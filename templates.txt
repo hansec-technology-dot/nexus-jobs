@@ -1,0 +1,8 @@
+Sarah Festus/
+├── database.py
+├── main.py
+├── models.py
+├── schemas.py
+├── requirements.txt
+└── templates/          <-- You need to create this folder
+    └── index.html      <-- Move your index.html inside it
