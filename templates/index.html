@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en" class="scroll-smooth">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Remote Work Insider</title>
+  <!-- Tailwind CDN (swap for PostCSS build in production) -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -17,18 +18,18 @@
               500: '#0ea5e9',
               600: '#0284c7',
               700: '#0369a1',
+              900: '#0c4a6e',
             },
             surface: {
-              900: '#0f1117',
-              800: '#161b27',
-              700: '#1e2535',
-              600: '#252d40',
-              500: '#2e3951',
+              900: '#0f172a',
+              800: '#1e293b',
+              700: '#273548',
+              600: '#334155',
             }
           },
           fontFamily: {
             sans: ['Inter', 'system-ui', 'sans-serif'],
-          }
+          },
         }
       }
     }
@@ -36,250 +37,246 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <style>
-    /* Scrollbar styling */
+    body { background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%); min-height: 100vh; }
+    .glass { background: rgba(30,41,59,0.7); backdrop-filter: blur(12px); border: 1px solid rgba(148,163,184,0.1); }
+    .card-hover { transition: transform .2s ease, box-shadow .2s ease; }
+    .card-hover:hover { transform: translateY(-2px); box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
+    .modal-bg { background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); }
+    .form-input {
+      background: rgba(15,23,42,0.8);
+      border: 1px solid rgba(148,163,184,0.2);
+      color: #e2e8f0;
+      border-radius: 0.5rem;
+      padding: 0.625rem 0.875rem;
+      width: 100%;
+      font-size: 0.875rem;
+      transition: border-color .15s ease, box-shadow .15s ease;
+    }
+    .form-input:focus { outline: none; border-color: #38bdf8; box-shadow: 0 0 0 3px rgba(56,189,248,0.15); }
+    .form-input::placeholder { color: #64748b; }
+    .btn-primary {
+      background: linear-gradient(135deg, #0ea5e9, #0284c7);
+      color: #fff;
+      font-weight: 600;
+      padding: 0.625rem 1.25rem;
+      border-radius: 0.5rem;
+      border: none;
+      cursor: pointer;
+      transition: opacity .15s ease, transform .1s ease;
+      font-size: 0.875rem;
+    }
+    .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+    .btn-primary:active { transform: translateY(0); }
+    .btn-ghost {
+      background: transparent;
+      color: #94a3b8;
+      font-weight: 500;
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
+      border: 1px solid rgba(148,163,184,0.2);
+      cursor: pointer;
+      transition: background .15s ease, color .15s ease;
+      font-size: 0.875rem;
+    }
+    .btn-ghost:hover { background: rgba(148,163,184,0.1); color: #e2e8f0; }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      padding: 0.2rem 0.6rem;
+      border-radius: 9999px;
+    }
+    .badge-pending  { background: rgba(234,179,8,0.15);  color: #fbbf24; }
+    .badge-secured  { background: rgba(34,197,94,0.15);  color: #4ade80; }
+    .badge-closed   { background: rgba(148,163,184,0.1); color: #64748b; }
+    .stat-card { background: rgba(14,165,233,0.08); border: 1px solid rgba(14,165,233,0.2); }
+    .section-title { font-size: 1.5rem; font-weight: 700; color: #f1f5f9; letter-spacing: -0.02em; }
+    textarea.form-input { resize: vertical; min-height: 90px; }
+    select.form-input option { background: #1e293b; color: #e2e8f0; }
     ::-webkit-scrollbar { width: 6px; }
-    ::-webkit-scrollbar-track { background: #0f1117; }
-    ::-webkit-scrollbar-thumb { background: #2e3951; border-radius: 3px; }
-    /* Modal backdrop */
-    .modal-backdrop { backdrop-filter: blur(4px); }
-    /* Gradient text */
-    .gradient-text {
-      background: linear-gradient(135deg, #38bdf8 0%, #818cf8 50%, #c084fc 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-    /* Card hover effect */
-    .card-hover {
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-    .card-hover:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 30px rgba(56, 189, 248, 0.08);
-    }
-    /* Status badge colors */
-    .status-pending  { background: rgba(251,191,36,0.15); color: #fbbf24; border: 1px solid rgba(251,191,36,0.3); }
-    .status-secured  { background: rgba(52,211,153,0.15); color: #34d399; border: 1px solid rgba(52,211,153,0.3); }
-    .status-closed   { background: rgba(156,163,175,0.15); color: #9ca3af; border: 1px solid rgba(156,163,175,0.3); }
-    /* Smooth fade-in */
-    @keyframes fadeInUp {
-      from { opacity: 0; transform: translateY(12px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-    .fade-in { animation: fadeInUp 0.35s ease forwards; }
-    /* Form input focus ring */
-    .form-input:focus { outline: none; box-shadow: 0 0 0 2px rgba(56,189,248,0.4); }
+    ::-webkit-scrollbar-track { background: #0f172a; }
+    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+    .animate-in { animation: fadeSlideIn .3s ease forwards; }
+    @keyframes fadeSlideIn { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
   </style>
 </head>
+<body class="dark text-slate-300 font-sans">
 
-<body class="bg-surface-900 text-gray-100 font-sans min-h-screen">
-
-<!-- ═══════════════════════════════════════════════════════ HEADER ═══ -->
-<header class="sticky top-0 z-40 border-b border-surface-600 bg-surface-900/90 backdrop-blur-md">
+<!-- ========================================================
+     HEADER
+======================================================== -->
+<header class="sticky top-0 z-50 glass border-b border-slate-700/50">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="flex items-center justify-between h-16">
-      <!-- Brand -->
       <div class="flex items-center gap-3">
-        <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-400 to-purple-500 flex items-center justify-center text-white font-bold text-sm">R</div>
-        <span class="text-xl font-bold gradient-text">Remote Work Insider</span>
+        <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center">
+          <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+          </svg>
+        </div>
+        <span class="text-white font-bold text-lg tracking-tight">Remote Work Insider</span>
       </div>
-      <!-- Nav links (desktop) -->
-      <nav class="hidden md:flex items-center gap-6 text-sm text-gray-400">
-        <a href="#jobs" class="hover:text-brand-400 transition-colors">Job Board</a>
-        <a href="#blog" class="hover:text-brand-400 transition-colors">Writers' Corner</a>
-        <a href="#stats" class="hover:text-brand-400 transition-colors">Stats</a>
+      <nav class="hidden md:flex items-center gap-6 text-sm text-slate-400">
+        <a href="#jobs" class="hover:text-white transition-colors">Jobs</a>
+        <a href="#blog" class="hover:text-white transition-colors">Writers</a>
+        <button onclick="openModal('registerModal')" class="btn-primary text-xs px-4 py-2">Join Now</button>
       </nav>
-      <!-- CTA buttons -->
-      <div class="flex items-center gap-2">
-        <button onclick="openModal('registerModal')"
-          class="text-sm px-4 py-1.5 rounded-lg border border-surface-500 text-gray-300 hover:border-brand-400 hover:text-brand-400 transition-all">
-          Register
-        </button>
-        <button onclick="openModal('postJobModal')"
-          class="text-sm px-4 py-1.5 rounded-lg bg-brand-500 hover:bg-brand-600 text-white font-medium transition-all">
-          Post a Job
-        </button>
-      </div>
+      <button onclick="openModal('registerModal')" class="md:hidden btn-primary text-xs px-3 py-2">Join</button>
     </div>
   </div>
 </header>
 
-<!-- ═════════════════════════════════════════════════════════ HERO ═══ -->
-<section class="relative overflow-hidden border-b border-surface-700">
-  <div class="absolute inset-0 bg-gradient-to-br from-surface-800 via-surface-900 to-surface-900"></div>
-  <div class="absolute top-0 left-1/4 w-96 h-96 bg-brand-500/5 rounded-full blur-3xl pointer-events-none"></div>
-  <div class="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-500/5 rounded-full blur-3xl pointer-events-none"></div>
-  <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center">
-    <div class="inline-flex items-center gap-2 bg-surface-700 border border-surface-500 rounded-full px-4 py-1.5 text-xs text-brand-400 font-medium mb-6">
-      <span class="w-1.5 h-1.5 rounded-full bg-brand-400 animate-pulse"></span>
-      The platform for remote professionals
-    </div>
-    <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight mb-6">
-      <span class="gradient-text">Work Remotely.</span><br />
-      <span class="text-gray-100">Live Freely.</span>
+<!-- ========================================================
+     HERO STATS
+======================================================== -->
+<section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+  <div class="text-center mb-8">
+    <h1 class="text-4xl sm:text-5xl font-extrabold text-white tracking-tight mb-3">
+      Find Your Next <span class="text-brand-400">Remote Role</span>
     </h1>
-    <p class="text-lg text-gray-400 max-w-2xl mx-auto mb-10">
-      Curated remote jobs, insider career stories, and a referral network that rewards your connections.
+    <p class="text-slate-400 text-lg max-w-xl mx-auto">
+      Curated remote opportunities, insider writing, and a referral network that works for you.
     </p>
-    <!-- Stats bar -->
-    <div id="stats" class="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-3xl mx-auto">
-      {% set stat_items = [
-        ("💼", counts.jobs, "Jobs Listed"),
-        ("👥", counts.users, "Professionals"),
-        ("📨", counts.applications, "Applications"),
-        ("✍️", counts.posts, "Articles")
-      ] %}
-      {% for icon, val, label in stat_items %}
-      <div class="bg-surface-800 border border-surface-600 rounded-xl p-4">
-        <div class="text-2xl mb-1">{{ icon }}</div>
-        <div class="text-2xl font-bold text-brand-400" data-stat="{{ label }}">{{ val }}</div>
-        <div class="text-xs text-gray-500 mt-0.5">{{ label }}</div>
-      </div>
-      {% endfor %}
+  </div>
+  <div class="grid grid-cols-3 gap-4 max-w-lg mx-auto">
+    <div class="stat-card rounded-xl p-4 text-center">
+      <div class="text-2xl font-bold text-brand-400" id="stat-jobs">{{ counts.jobs }}</div>
+      <div class="text-xs text-slate-500 mt-1 uppercase tracking-wide">Open Jobs</div>
+    </div>
+    <div class="stat-card rounded-xl p-4 text-center">
+      <div class="text-2xl font-bold text-brand-400" id="stat-users">{{ counts.users }}</div>
+      <div class="text-xs text-slate-500 mt-1 uppercase tracking-wide">Members</div>
+    </div>
+    <div class="stat-card rounded-xl p-4 text-center">
+      <div class="text-2xl font-bold text-brand-400" id="stat-placements">{{ counts.placements }}</div>
+      <div class="text-xs text-slate-500 mt-1 uppercase tracking-wide">Placements</div>
     </div>
   </div>
 </section>
 
-<!-- ═══════════════════════════════════════════════════ MAIN LAYOUT ═══ -->
-<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-  <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
+<!-- ========================================================
+     MAIN GRID
+======================================================== -->
+<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
+  <div class="grid lg:grid-cols-5 gap-8">
 
-    <!-- ══════════════════════════════════════ JOB BOARD (left / 2/3) ═══ -->
-    <section id="jobs" class="lg:col-span-2">
+    <!-- =====================================================
+         LEFT: JOB BOARD (3 cols)
+    ====================================================== -->
+    <section id="jobs" class="lg:col-span-3">
       <div class="flex items-center justify-between mb-6">
-        <div>
-          <h2 class="text-2xl font-bold text-gray-100">Job Board</h2>
-          <p class="text-sm text-gray-500 mt-1">Remote-only, hand-curated positions</p>
+        <h2 class="section-title">🌐 Job Board</h2>
+        <div class="flex gap-2">
+          <button onclick="openModal('postJobModal')" class="btn-ghost text-xs">+ Post Job</button>
         </div>
-        <button onclick="openModal('postJobModal')"
-          class="hidden sm:flex items-center gap-2 text-sm px-4 py-2 rounded-lg bg-surface-700 border border-surface-500 hover:border-brand-400 text-gray-300 hover:text-brand-400 transition-all">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-          Post Job
-        </button>
       </div>
 
-      <!-- Job list (server-rendered) -->
-      <div id="jobList" class="space-y-4">
+      <!-- Job list (server-side rendered) -->
+      <div id="job-list" class="space-y-4">
         {% if jobs %}
           {% for job in jobs %}
-          <article class="card-hover bg-surface-800 border border-surface-600 rounded-2xl p-6 group">
+          <article class="glass rounded-xl p-5 card-hover" data-job-id="{{ job.id }}">
             <div class="flex items-start justify-between gap-4">
               <div class="flex-1 min-w-0">
-                <div class="flex items-center gap-2 mb-1">
-                  <span class="text-xs font-medium bg-brand-500/10 text-brand-400 border border-brand-500/20 rounded-full px-2.5 py-0.5">Remote</span>
-                  <span class="text-xs text-gray-500">{{ job.created_at.strftime('%b %d, %Y') if job.created_at else '' }}</span>
-                </div>
-                <h3 class="text-lg font-semibold text-gray-100 truncate">{{ job.title }}</h3>
-                <p class="text-sm text-brand-400 font-medium mt-0.5">{{ job.company }}</p>
-                <p class="text-sm text-gray-400 mt-2 line-clamp-2">{{ job.description }}</p>
+                <h3 class="font-semibold text-white text-base truncate">{{ job.title }}</h3>
+                <p class="text-brand-400 text-sm font-medium mt-0.5">{{ job.company }}</p>
+                <p class="text-slate-400 text-sm mt-2 line-clamp-2">{{ job.description }}</p>
                 {% if job.requirements %}
-                <p class="text-xs text-gray-500 mt-2 line-clamp-1"><span class="text-gray-400">Requirements:</span> {{ job.requirements }}</p>
+                <p class="text-slate-500 text-xs mt-1 line-clamp-1"><span class="text-slate-400 font-medium">Req:</span> {{ job.requirements }}</p>
                 {% endif %}
               </div>
-              <button
-                onclick="openApplyModal({{ job.id }}, '{{ job.title | e }}', '{{ job.company | e }}')"
-                class="shrink-0 px-4 py-2 rounded-lg bg-brand-500/10 border border-brand-500/30 text-brand-400 text-sm font-medium hover:bg-brand-500 hover:text-white transition-all">
-                Apply
-              </button>
+              <div class="flex flex-col items-end gap-2 shrink-0">
+                <span class="badge badge-pending">Open</span>
+                <button
+                  onclick="openApplyModal({{ job.id }}, '{{ job.title | replace("'", "\\'") }}')"
+                  class="btn-primary text-xs px-3 py-1.5 whitespace-nowrap"
+                >Apply →</button>
+              </div>
+            </div>
+            <div class="flex items-center gap-3 mt-3 pt-3 border-t border-slate-700/50 text-xs text-slate-500">
+              <span>📧 {{ job.contact_email }}</span>
+              <span>·</span>
+              <span>{{ job.created_at.strftime('%b %d, %Y') }}</span>
             </div>
           </article>
           {% endfor %}
         {% else %}
-        <div class="text-center py-20 bg-surface-800 border border-dashed border-surface-500 rounded-2xl">
-          <div class="text-4xl mb-3">🔍</div>
-          <p class="text-gray-400 font-medium">No jobs listed yet.</p>
-          <p class="text-sm text-gray-600 mt-1">Be the first to <button onclick="openModal('postJobModal')" class="text-brand-400 hover:underline">post a job</button>.</p>
-        </div>
+          <div class="glass rounded-xl p-10 text-center text-slate-500" id="no-jobs-placeholder">
+            <div class="text-3xl mb-3">💼</div>
+            <p>No jobs posted yet. Be the first to post!</p>
+          </div>
         {% endif %}
       </div>
     </section>
 
-    <!-- ══════════════════════════════ WRITERS' CORNER (right / 1/3) ═══ -->
-    <section id="blog" class="lg:col-span-1">
+    <!-- =====================================================
+         RIGHT: WRITERS' CORNER (2 cols)
+    ====================================================== -->
+    <section id="blog" class="lg:col-span-2">
       <div class="flex items-center justify-between mb-6">
-        <div>
-          <h2 class="text-2xl font-bold text-gray-100">Writers' Corner</h2>
-          <p class="text-sm text-gray-500 mt-1">Insights from the remote-work community</p>
-        </div>
-        <button onclick="openModal('blogModal')"
-          class="text-sm px-3 py-1.5 rounded-lg bg-surface-700 border border-surface-500 hover:border-purple-400 text-gray-300 hover:text-purple-400 transition-all">
-          Write
-        </button>
+        <h2 class="section-title">✍️ Writers' Corner</h2>
+        <button onclick="openModal('blogModal')" class="btn-ghost text-xs">+ Write</button>
       </div>
 
-      <!-- Blog list (server-rendered) -->
-      <div id="blogList" class="space-y-4">
+      <div id="blog-list" class="space-y-4">
         {% if blog_posts %}
           {% for post in blog_posts %}
-          <article class="card-hover bg-surface-800 border border-surface-600 rounded-2xl p-5 group">
-            <div class="flex items-center gap-2 mb-2">
-              <div class="w-6 h-6 rounded-full bg-gradient-to-br from-purple-400 to-pink-500 flex items-center justify-center text-white text-xs font-bold">
-                {{ post.author_name[0] | upper if post.author_name else 'A' }}
+          <article class="glass rounded-xl p-5 card-hover">
+            <h3 class="font-semibold text-white text-sm leading-snug">{{ post.title }}</h3>
+            <p class="text-slate-400 text-xs mt-1 mb-2 line-clamp-3">{{ post.content }}</p>
+            <div class="flex items-center justify-between mt-3 pt-3 border-t border-slate-700/50 text-xs text-slate-500">
+              <span class="text-brand-400 font-medium">{{ post.author_name }}</span>
+              <div class="flex items-center gap-2">
+                {% if post.sample_url %}
+                <a href="{{ post.sample_url }}" target="_blank" rel="noopener"
+                   class="text-brand-400 hover:text-brand-300 transition-colors underline underline-offset-2">
+                  Sample ↗
+                </a>
+                <span>·</span>
+                {% endif %}
+                <span>{{ post.created_at.strftime('%b %d') }}</span>
               </div>
-              <span class="text-xs text-gray-400 font-medium">{{ post.author_name or 'Anonymous' }}</span>
-              <span class="text-xs text-gray-600">· {{ post.created_at.strftime('%b %d') if post.created_at else '' }}</span>
             </div>
-            <h3 class="text-base font-semibold text-gray-100 group-hover:text-brand-400 transition-colors leading-snug">{{ post.title }}</h3>
-            <p class="text-sm text-gray-500 mt-1.5 line-clamp-3">{{ post.content }}</p>
-            {% if post.sample_url %}
-            <a href="{{ post.sample_url }}" target="_blank" rel="noopener noreferrer"
-               class="inline-flex items-center gap-1 text-xs text-purple-400 hover:text-purple-300 mt-2 transition-colors">
-              Read full article
-              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
-            </a>
-            {% endif %}
           </article>
           {% endfor %}
         {% else %}
-        <div class="text-center py-16 bg-surface-800 border border-dashed border-surface-500 rounded-2xl">
-          <div class="text-4xl mb-3">✍️</div>
-          <p class="text-gray-400 font-medium">No articles yet.</p>
-          <p class="text-sm text-gray-600 mt-1"><button onclick="openModal('blogModal')" class="text-purple-400 hover:underline">Share your story</button>.</p>
-        </div>
+          <div class="glass rounded-xl p-10 text-center text-slate-500" id="no-posts-placeholder">
+            <div class="text-3xl mb-3">📝</div>
+            <p>No articles yet. Share your remote work insights!</p>
+          </div>
         {% endif %}
       </div>
     </section>
-
   </div>
 </main>
 
-<!-- ═══════════════════════════════════════════════════════ FOOTER ═══ -->
-<footer class="border-t border-surface-700 mt-20 py-8">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-gray-600">
-    <span>© 2025 Remote Work Insider. All rights reserved.</span>
-    <span>Built with FastAPI · SQLAlchemy · Tailwind CSS</span>
-  </div>
-</footer>
+<!-- ========================================================
+     MODALS
+======================================================== -->
 
-
-<!-- ═══════════════════════════════════════ MODAL: REGISTER USER ═══ -->
-<div id="registerModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop bg-black/60">
-  <div class="bg-surface-800 border border-surface-500 rounded-2xl w-full max-w-md shadow-2xl fade-in">
-    <div class="flex items-center justify-between p-6 border-b border-surface-700">
-      <div>
-        <h3 class="text-lg font-semibold text-gray-100">Create Account</h3>
-        <p class="text-xs text-gray-500 mt-0.5">Join the Remote Work Insider community</p>
-      </div>
-      <button onclick="closeModal('registerModal')" class="text-gray-500 hover:text-gray-300 transition-colors">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-      </button>
+<!-- ── Register Modal ── -->
+<div id="registerModal" class="fixed inset-0 z-50 hidden flex items-center justify-center modal-bg p-4">
+  <div class="glass rounded-2xl w-full max-w-md p-8 shadow-2xl animate-in">
+    <div class="flex items-center justify-between mb-6">
+      <h2 class="text-xl font-bold text-white">Create Account</h2>
+      <button onclick="closeModal('registerModal')" class="text-slate-500 hover:text-white text-xl leading-none">×</button>
     </div>
-    <form id="registerForm" class="p-6 space-y-4" onsubmit="submitRegister(event)">
+    <div id="register-msg" class="hidden mb-4 rounded-lg p-3 text-sm"></div>
+    <div class="space-y-4">
       <div>
-        <label class="block text-xs font-medium text-gray-400 mb-1.5">Full Name *</label>
-        <input name="name" type="text" required placeholder="Jane Doe"
-          class="form-input w-full bg-surface-700 border border-surface-500 rounded-xl px-4 py-2.5 text-sm text-gray-100 placeholder-gray-600 focus:border-brand-400 transition-colors" />
+        <label class="block text-xs font-medium text-slate-400 mb-1.5">Full Name *</label>
+        <input id="reg-name" type="text" class="form-input" placeholder="Alex Chen" />
       </div>
       <div>
-        <label class="block text-xs font-medium text-gray-400 mb-1.5">Email Address *</label>
-        <input name="email" type="email" required placeholder="jane@example.com"
-          class="form-input w-full bg-surface-700 border border-surface-500 rounded-xl px-4 py-2.5 text-sm text-gray-100 placeholder-gray-600 focus:border-brand-400 transition-colors" />
+        <label class="block text-xs font-medium text-slate-400 mb-1.5">Email *</label>
+        <input id="reg-email" type="email" class="form-input" placeholder="alex@example.com" />
       </div>
       <div>
-        <label class="block text-xs font-medium text-gray-400 mb-1.5">Role *</label>
-        <select name="role" required
-          class="form-input w-full bg-surface-700 border border-surface-500 rounded-xl px-4 py-2.5 text-sm text-gray-100 focus:border-brand-400 transition-colors">
-          <option value="">Select your role…</option>
+        <label class="block text-xs font-medium text-slate-400 mb-1.5">Role *</label>
+        <select id="reg-role" class="form-input">
           <option value="job_seeker">Job Seeker</option>
           <option value="employer">Employer</option>
           <option value="writer">Writer</option>
@@ -287,174 +284,142 @@
         </select>
       </div>
       <div>
-        <label class="block text-xs font-medium text-gray-400 mb-1.5">Referrer ID <span class="text-gray-600">(optional)</span></label>
-        <input name="referrer_id" type="number" min="1" placeholder="e.g. 42"
-          class="form-input w-full bg-surface-700 border border-surface-500 rounded-xl px-4 py-2.5 text-sm text-gray-100 placeholder-gray-600 focus:border-brand-400 transition-colors" />
-        <p class="text-xs text-gray-600 mt-1">Enter the ID of the user who referred you.</p>
+        <label class="block text-xs font-medium text-slate-400 mb-1.5">Referrer ID <span class="text-slate-600">(optional)</span></label>
+        <input id="reg-referrer" type="number" class="form-input" placeholder="e.g. 3" />
       </div>
-      <div id="registerMsg" class="hidden text-sm rounded-xl px-4 py-2.5"></div>
-      <button type="submit"
-        class="w-full py-3 rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 hover:from-brand-600 hover:to-brand-700 text-white font-semibold transition-all text-sm">
-        Create Account
-      </button>
-    </form>
-  </div>
-</div>
-
-
-<!-- ═══════════════════════════════════════ MODAL: POST JOB ═══ -->
-<div id="postJobModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop bg-black/60">
-  <div class="bg-surface-800 border border-surface-500 rounded-2xl w-full max-w-lg shadow-2xl fade-in overflow-y-auto max-h-[90vh]">
-    <div class="flex items-center justify-between p-6 border-b border-surface-700 sticky top-0 bg-surface-800">
-      <div>
-        <h3 class="text-lg font-semibold text-gray-100">Post a Job</h3>
-        <p class="text-xs text-gray-500 mt-0.5">Reach thousands of remote professionals</p>
-      </div>
-      <button onclick="closeModal('postJobModal')" class="text-gray-500 hover:text-gray-300 transition-colors">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-      </button>
+      <button onclick="submitRegister()" class="btn-primary w-full mt-2">Create Account</button>
     </div>
-    <form id="postJobForm" class="p-6 space-y-4" onsubmit="submitJob(event)">
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div>
-          <label class="block text-xs font-medium text-gray-400 mb-1.5">Job Title *</label>
-          <input name="title" type="text" required placeholder="Senior Product Designer"
-            class="form-input w-full bg-surface-700 border border-surface-500 rounded-xl px-4 py-2.5 text-sm text-gray-100 placeholder-gray-600 focus:border-brand-400 transition-colors" />
-        </div>
-        <div>
-          <label class="block text-xs font-medium text-gray-400 mb-1.5">Company *</label>
-          <input name="company" type="text" required placeholder="Acme Corp"
-            class="form-input w-full bg-surface-700 border border-surface-500 rounded-xl px-4 py-2.5 text-sm text-gray-100 placeholder-gray-600 focus:border-brand-400 transition-colors" />
-        </div>
-      </div>
-      <div>
-        <label class="block text-xs font-medium text-gray-400 mb-1.5">Job Description *</label>
-        <textarea name="description" required rows="4" placeholder="Describe the role, responsibilities, and team…"
-          class="form-input w-full bg-surface-700 border border-surface-500 rounded-xl px-4 py-2.5 text-sm text-gray-100 placeholder-gray-600 focus:border-brand-400 transition-colors resize-none"></textarea>
-      </div>
-      <div>
-        <label class="block text-xs font-medium text-gray-400 mb-1.5">Requirements <span class="text-gray-600">(optional)</span></label>
-        <textarea name="requirements" rows="3" placeholder="3+ years React, TypeScript, remote experience…"
-          class="form-input w-full bg-surface-700 border border-surface-500 rounded-xl px-4 py-2.5 text-sm text-gray-100 placeholder-gray-600 focus:border-brand-400 transition-colors resize-none"></textarea>
-      </div>
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div>
-          <label class="block text-xs font-medium text-gray-400 mb-1.5">Contact Email *</label>
-          <input name="contact_email" type="email" required placeholder="hiring@acme.com"
-            class="form-input w-full bg-surface-700 border border-surface-500 rounded-xl px-4 py-2.5 text-sm text-gray-100 placeholder-gray-600 focus:border-brand-400 transition-colors" />
-        </div>
-        <div>
-          <label class="block text-xs font-medium text-gray-400 mb-1.5">Your Employer ID <span class="text-gray-600">(optional)</span></label>
-          <input name="posted_by_id" type="number" min="1" placeholder="e.g. 7"
-            class="form-input w-full bg-surface-700 border border-surface-500 rounded-xl px-4 py-2.5 text-sm text-gray-100 placeholder-gray-600 focus:border-brand-400 transition-colors" />
-          <p class="text-xs text-gray-600 mt-1">Must be a user with 'employer' role.</p>
-        </div>
-      </div>
-      <div id="postJobMsg" class="hidden text-sm rounded-xl px-4 py-2.5"></div>
-      <button type="submit"
-        class="w-full py-3 rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 hover:from-brand-600 hover:to-brand-700 text-white font-semibold transition-all text-sm">
-        Publish Job Listing
-      </button>
-    </form>
   </div>
 </div>
 
-
-<!-- ═══════════════════════════════════════ MODAL: APPLY TO JOB ═══ -->
-<div id="applyModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop bg-black/60">
-  <div class="bg-surface-800 border border-surface-500 rounded-2xl w-full max-w-sm shadow-2xl fade-in">
-    <div class="flex items-center justify-between p-6 border-b border-surface-700">
-      <div>
-        <h3 class="text-lg font-semibold text-gray-100">Apply for Role</h3>
-        <p id="applyJobLabel" class="text-xs text-brand-400 font-medium mt-0.5"></p>
-      </div>
-      <button onclick="closeModal('applyModal')" class="text-gray-500 hover:text-gray-300 transition-colors">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-      </button>
+<!-- ── Post Job Modal ── -->
+<div id="postJobModal" class="fixed inset-0 z-50 hidden flex items-center justify-center modal-bg p-4">
+  <div class="glass rounded-2xl w-full max-w-lg p-8 shadow-2xl animate-in overflow-y-auto max-h-[90vh]">
+    <div class="flex items-center justify-between mb-6">
+      <h2 class="text-xl font-bold text-white">Post a Job</h2>
+      <button onclick="closeModal('postJobModal')" class="text-slate-500 hover:text-white text-xl leading-none">×</button>
     </div>
-    <form id="applyForm" class="p-6 space-y-4" onsubmit="submitApplication(event)">
-      <input type="hidden" id="applyJobId" name="job_id" />
+    <div id="job-msg" class="hidden mb-4 rounded-lg p-3 text-sm"></div>
+    <div class="space-y-4">
       <div>
-        <label class="block text-xs font-medium text-gray-400 mb-1.5">Your User ID *</label>
-        <input name="user_id" type="number" min="1" required placeholder="e.g. 3"
-          class="form-input w-full bg-surface-700 border border-surface-500 rounded-xl px-4 py-2.5 text-sm text-gray-100 placeholder-gray-600 focus:border-brand-400 transition-colors" />
-        <p class="text-xs text-gray-600 mt-1">Must be a registered user with 'job_seeker' or 'writer' role.</p>
+        <label class="block text-xs font-medium text-slate-400 mb-1.5">Job Title *</label>
+        <input id="job-title" type="text" class="form-input" placeholder="Senior Backend Engineer" />
       </div>
-      <div id="applyMsg" class="hidden text-sm rounded-xl px-4 py-2.5"></div>
-      <button type="submit"
-        class="w-full py-3 rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 hover:from-brand-600 hover:to-brand-700 text-white font-semibold transition-all text-sm">
-        Submit Application
-      </button>
-    </form>
-  </div>
-</div>
-
-
-<!-- ═══════════════════════════════════════ MODAL: BLOG POST ═══ -->
-<div id="blogModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop bg-black/60">
-  <div class="bg-surface-800 border border-surface-500 rounded-2xl w-full max-w-lg shadow-2xl fade-in overflow-y-auto max-h-[90vh]">
-    <div class="flex items-center justify-between p-6 border-b border-surface-700 sticky top-0 bg-surface-800">
       <div>
-        <h3 class="text-lg font-semibold text-gray-100">Publish an Article</h3>
-        <p class="text-xs text-gray-500 mt-0.5">Share your remote-work experience</p>
+        <label class="block text-xs font-medium text-slate-400 mb-1.5">Company *</label>
+        <input id="job-company" type="text" class="form-input" placeholder="Acme Corp" />
       </div>
-      <button onclick="closeModal('blogModal')" class="text-gray-500 hover:text-gray-300 transition-colors">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-      </button>
+      <div>
+        <label class="block text-xs font-medium text-slate-400 mb-1.5">Description *</label>
+        <textarea id="job-desc" class="form-input" placeholder="Describe the role, responsibilities, and team…"></textarea>
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-slate-400 mb-1.5">Requirements</label>
+        <textarea id="job-req" class="form-input" placeholder="5+ years Python, FastAPI, PostgreSQL…" style="min-height:70px"></textarea>
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-slate-400 mb-1.5">Contact Email *</label>
+        <input id="job-email" type="email" class="form-input" placeholder="hire@acmecorp.com" />
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-slate-400 mb-1.5">Your User ID <span class="text-slate-600">(employer only, optional)</span></label>
+        <input id="job-poster" type="number" class="form-input" placeholder="e.g. 2" />
+      </div>
+      <button onclick="submitJob()" class="btn-primary w-full mt-2">Publish Job</button>
     </div>
-    <form id="blogForm" class="p-6 space-y-4" onsubmit="submitBlog(event)">
-      <div>
-        <label class="block text-xs font-medium text-gray-400 mb-1.5">Author ID *</label>
-        <input name="author_id" type="number" min="1" required placeholder="e.g. 2"
-          class="form-input w-full bg-surface-700 border border-surface-500 rounded-xl px-4 py-2.5 text-sm text-gray-100 placeholder-gray-600 focus:border-brand-400 transition-colors" />
-        <p class="text-xs text-gray-600 mt-1">Must be registered with a 'writer', 'job_seeker', or 'referrer' role.</p>
-      </div>
-      <div>
-        <label class="block text-xs font-medium text-gray-400 mb-1.5">Article Title *</label>
-        <input name="title" type="text" required placeholder="How I Landed My Dream Remote Job"
-          class="form-input w-full bg-surface-700 border border-surface-500 rounded-xl px-4 py-2.5 text-sm text-gray-100 placeholder-gray-600 focus:border-brand-400 transition-colors" />
-      </div>
-      <div>
-        <label class="block text-xs font-medium text-gray-400 mb-1.5">Content *</label>
-        <textarea name="content" required rows="5" placeholder="Share your insights, tips, and story with the community…"
-          class="form-input w-full bg-surface-700 border border-surface-500 rounded-xl px-4 py-2.5 text-sm text-gray-100 placeholder-gray-600 focus:border-brand-400 transition-colors resize-none"></textarea>
-      </div>
-      <div>
-        <label class="block text-xs font-medium text-gray-400 mb-1.5">Sample / Portfolio URL <span class="text-gray-600">(optional)</span></label>
-        <input name="sample_url" type="url" placeholder="https://medium.com/@you/article"
-          class="form-input w-full bg-surface-700 border border-surface-500 rounded-xl px-4 py-2.5 text-sm text-gray-100 placeholder-gray-600 focus:border-brand-400 transition-colors" />
-      </div>
-      <div id="blogMsg" class="hidden text-sm rounded-xl px-4 py-2.5"></div>
-      <button type="submit"
-        class="w-full py-3 rounded-xl bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white font-semibold transition-all text-sm">
-        Publish Article
-      </button>
-    </form>
   </div>
 </div>
 
+<!-- ── Apply Modal ── -->
+<div id="applyModal" class="fixed inset-0 z-50 hidden flex items-center justify-center modal-bg p-4">
+  <div class="glass rounded-2xl w-full max-w-sm p-8 shadow-2xl animate-in">
+    <div class="flex items-center justify-between mb-2">
+      <h2 class="text-xl font-bold text-white">Apply for Role</h2>
+      <button onclick="closeModal('applyModal')" class="text-slate-500 hover:text-white text-xl leading-none">×</button>
+    </div>
+    <p id="apply-job-title" class="text-brand-400 text-sm mb-5 font-medium"></p>
+    <div id="apply-msg" class="hidden mb-4 rounded-lg p-3 text-sm"></div>
+    <input type="hidden" id="apply-job-id" />
+    <div class="space-y-4">
+      <div>
+        <label class="block text-xs font-medium text-slate-400 mb-1.5">Your User ID *</label>
+        <input id="apply-user-id" type="number" class="form-input" placeholder="Enter your user ID after registering" />
+        <p class="text-xs text-slate-600 mt-1">Register first to get your ID.</p>
+      </div>
+      <button onclick="submitApply()" class="btn-primary w-full">Submit Application</button>
+    </div>
+  </div>
+</div>
 
-<!-- ═══════════════════════════════════════════════════ JAVASCRIPT ═══ -->
+<!-- ── Blog Submit Modal ── -->
+<div id="blogModal" class="fixed inset-0 z-50 hidden flex items-center justify-center modal-bg p-4">
+  <div class="glass rounded-2xl w-full max-w-lg p-8 shadow-2xl animate-in overflow-y-auto max-h-[90vh]">
+    <div class="flex items-center justify-between mb-6">
+      <h2 class="text-xl font-bold text-white">Publish Article</h2>
+      <button onclick="closeModal('blogModal')" class="text-slate-500 hover:text-white text-xl leading-none">×</button>
+    </div>
+    <div id="blog-msg" class="hidden mb-4 rounded-lg p-3 text-sm"></div>
+    <div class="space-y-4">
+      <div>
+        <label class="block text-xs font-medium text-slate-400 mb-1.5">Your User ID *</label>
+        <input id="blog-author" type="number" class="form-input" placeholder="Enter your user ID" />
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-slate-400 mb-1.5">Title *</label>
+        <input id="blog-title" type="text" class="form-input" placeholder="10 Remote Work Tools That Transformed My Workflow" />
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-slate-400 mb-1.5">Content *</label>
+        <textarea id="blog-content" class="form-input" style="min-height:120px" placeholder="Share your remote work insights, tips, and experiences…"></textarea>
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-slate-400 mb-1.5">Sample / Portfolio URL <span class="text-slate-600">(optional)</span></label>
+        <input id="blog-url" type="url" class="form-input" placeholder="https://yourportfolio.com/article" />
+      </div>
+      <button onclick="submitBlog()" class="btn-primary w-full mt-2">Publish Article</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Toast Notification ── -->
+<div id="toast" class="fixed bottom-6 right-6 z-50 hidden">
+  <div id="toast-inner" class="glass rounded-xl px-5 py-3 text-sm font-medium shadow-2xl animate-in"></div>
+</div>
+
+<!-- ========================================================
+     FOOTER
+======================================================== -->
+<footer class="border-t border-slate-800 py-8 mt-4">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-600">
+    <span>© 2025 Remote Work Insider. Built with FastAPI &amp; ♥</span>
+    <span>Extend with auth, Stripe, and email notifications for production.</span>
+  </div>
+</footer>
+
+<!-- ========================================================
+     JAVASCRIPT
+======================================================== -->
 <script>
-  /* ── Modal helpers ─────────────────────────────────────────────── */
+  /* ── Modal helpers ── */
   function openModal(id) {
-    document.getElementById(id).classList.remove('hidden');
+    const el = document.getElementById(id);
+    el.classList.remove('hidden');
+    el.classList.add('flex');
     document.body.style.overflow = 'hidden';
   }
   function closeModal(id) {
-    document.getElementById(id).classList.add('hidden');
+    const el = document.getElementById(id);
+    el.classList.add('hidden');
+    el.classList.remove('flex');
     document.body.style.overflow = '';
-    clearMsg(id.replace('Modal', 'Msg'));
   }
-
-  // Close modal on backdrop click
+  // Close on backdrop click
   document.querySelectorAll('[id$="Modal"]').forEach(modal => {
     modal.addEventListener('click', e => {
       if (e.target === modal) closeModal(modal.id);
     });
   });
-
-  // ESC to close
+  // Close on Escape
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape') {
       document.querySelectorAll('[id$="Modal"]').forEach(m => {
@@ -463,255 +428,200 @@
     }
   });
 
-  /* ── Message helpers ───────────────────────────────────────────── */
-  function showMsg(id, text, isError = false) {
-    const el = document.getElementById(id);
-    if (!el) return;
-    el.classList.remove('hidden', 'bg-red-500/10', 'text-red-400', 'border-red-500/30',
-                         'bg-green-500/10', 'text-green-400', 'border-green-500/30');
-    if (isError) {
-      el.classList.add('bg-red-500/10', 'text-red-400', 'border', 'border-red-500/30');
-    } else {
-      el.classList.add('bg-green-500/10', 'text-green-400', 'border', 'border-green-500/30');
-    }
-    el.textContent = text;
-    el.classList.remove('hidden');
-  }
-  function clearMsg(id) {
-    const el = document.getElementById(id);
-    if (el) { el.classList.add('hidden'); el.textContent = ''; }
+  /* ── Toast ── */
+  function showToast(msg, ok = true) {
+    const t = document.getElementById('toast');
+    const inner = document.getElementById('toast-inner');
+    inner.textContent = msg;
+    inner.className = `glass rounded-xl px-5 py-3 text-sm font-medium shadow-2xl animate-in ${ok ? 'text-green-300' : 'text-red-400'}`;
+    t.classList.remove('hidden');
+    setTimeout(() => t.classList.add('hidden'), 3500);
   }
 
-  /* ── Date formatter ────────────────────────────────────────────── */
+  /* ── Inline message helpers ── */
+  function showMsg(id, msg, ok) {
+    const el = document.getElementById(id);
+    el.textContent = msg;
+    el.className = `mb-4 rounded-lg p-3 text-sm ${ok ? 'bg-green-900/30 text-green-300 border border-green-800/40' : 'bg-red-900/30 text-red-400 border border-red-800/40'}`;
+    el.classList.remove('hidden');
+  }
+
+  /* ── Format date ── */
   function fmtDate(iso) {
-    if (!iso) return '';
     const d = new Date(iso);
     return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   }
 
-  /* ── Register User ─────────────────────────────────────────────── */
-  async function submitRegister(e) {
-    e.preventDefault();
-    const form = e.target;
-    const btn  = form.querySelector('button[type=submit]');
-    const fd   = new FormData(form);
-    const body = {
-      name: fd.get('name').trim(),
-      email: fd.get('email').trim(),
-      role: fd.get('role'),
-    };
-    const ref = fd.get('referrer_id');
-    if (ref) body.referrer_id = parseInt(ref, 10);
-
-    btn.disabled = true; btn.textContent = 'Creating…';
+  /* ── REGISTER ── */
+  async function submitRegister() {
+    const name = document.getElementById('reg-name').value.trim();
+    const email = document.getElementById('reg-email').value.trim();
+    const role = document.getElementById('reg-role').value;
+    const referrerRaw = document.getElementById('reg-referrer').value.trim();
+    if (!name || !email) { showMsg('register-msg', 'Name and email are required.', false); return; }
+    const body = { name, email, role };
+    if (referrerRaw) body.referrer_id = parseInt(referrerRaw);
     try {
-      const res  = await fetch('/register', {
+      const res = await fetch('/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       });
       const data = await res.json();
-      if (!res.ok) {
-        showMsg('registerMsg', data.detail || 'Registration failed.', true);
-      } else {
-        showMsg('registerMsg', `✓ Welcome, ${data.name}! Your ID is ${data.id}. Keep it to apply for jobs or write articles.`);
-        form.reset();
-        incrementStat('Professionals');
-      }
-    } catch (err) {
-      showMsg('registerMsg', 'Network error. Please try again.', true);
-    } finally {
-      btn.disabled = false; btn.textContent = 'Create Account';
-    }
+      if (!res.ok) { showMsg('register-msg', data.detail || 'Registration failed.', false); return; }
+      showMsg('register-msg', `Welcome, ${data.name}! Your user ID is #${data.id}. Keep it to apply for jobs.`, true);
+      // Update member count
+      const stat = document.getElementById('stat-users');
+      if (stat) stat.textContent = parseInt(stat.textContent || 0) + 1;
+      ['reg-name','reg-email','reg-referrer'].forEach(id => document.getElementById(id).value = '');
+    } catch(e) { showMsg('register-msg', 'Network error. Please try again.', false); }
   }
 
-  /* ── Post Job ──────────────────────────────────────────────────── */
-  async function submitJob(e) {
-    e.preventDefault();
-    const form = e.target;
-    const btn  = form.querySelector('button[type=submit]');
-    const fd   = new FormData(form);
-    const body = {
-      title: fd.get('title').trim(),
-      company: fd.get('company').trim(),
-      description: fd.get('description').trim(),
-      requirements: fd.get('requirements').trim() || null,
-      contact_email: fd.get('contact_email').trim(),
-    };
-    const pid = fd.get('posted_by_id');
-    if (pid) body.posted_by_id = parseInt(pid, 10);
-
-    btn.disabled = true; btn.textContent = 'Publishing…';
+  /* ── POST JOB ── */
+  async function submitJob() {
+    const title = document.getElementById('job-title').value.trim();
+    const company = document.getElementById('job-company').value.trim();
+    const description = document.getElementById('job-desc').value.trim();
+    const requirements = document.getElementById('job-req').value.trim();
+    const contact_email = document.getElementById('job-email').value.trim();
+    const posterRaw = document.getElementById('job-poster').value.trim();
+    if (!title || !company || !description || !contact_email) {
+      showMsg('job-msg', 'Title, company, description, and contact email are required.', false); return;
+    }
+    const body = { title, company, description, contact_email };
+    if (requirements) body.requirements = requirements;
+    if (posterRaw) body.posted_by_id = parseInt(posterRaw);
     try {
-      const res  = await fetch('/jobs', {
+      const res = await fetch('/jobs', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       });
       const data = await res.json();
-      if (!res.ok) {
-        showMsg('postJobMsg', data.detail || 'Failed to post job.', true);
-      } else {
-        showMsg('postJobMsg', `✓ Job "${data.title}" published successfully!`);
-        form.reset();
-        prependJobCard(data);
-        incrementStat('Jobs Listed');
-      }
-    } catch (err) {
-      showMsg('postJobMsg', 'Network error. Please try again.', true);
-    } finally {
-      btn.disabled = false; btn.textContent = 'Publish Job Listing';
-    }
+      if (!res.ok) { showMsg('job-msg', data.detail || 'Failed to post job.', false); return; }
+      showMsg('job-msg', `Job "${data.title}" posted! ID: #${data.id}`, true);
+      appendJobCard(data);
+      ['job-title','job-company','job-desc','job-req','job-email','job-poster'].forEach(id => document.getElementById(id).value = '');
+      const stat = document.getElementById('stat-jobs');
+      if (stat) stat.textContent = parseInt(stat.textContent || 0) + 1;
+      // Remove placeholder
+      const ph = document.getElementById('no-jobs-placeholder');
+      if (ph) ph.remove();
+    } catch(e) { showMsg('job-msg', 'Network error. Please try again.', false); }
   }
 
-  /* ── Open Apply Modal ──────────────────────────────────────────── */
-  function openApplyModal(jobId, title, company) {
-    document.getElementById('applyJobId').value = jobId;
-    document.getElementById('applyJobLabel').textContent = `${title} @ ${company}`;
-    openModal('applyModal');
-  }
-
-  /* ── Apply to Job ──────────────────────────────────────────────── */
-  async function submitApplication(e) {
-    e.preventDefault();
-    const form  = e.target;
-    const btn   = form.querySelector('button[type=submit]');
-    const fd    = new FormData(form);
-    const jobId = fd.get('job_id');
-    const body  = {
-      job_id: parseInt(jobId, 10),
-      user_id: parseInt(fd.get('user_id'), 10),
-    };
-
-    btn.disabled = true; btn.textContent = 'Submitting…';
-    try {
-      const res  = await fetch(`/jobs/${jobId}/apply`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        showMsg('applyMsg', data.detail || 'Application failed.', true);
-      } else {
-        showMsg('applyMsg', `✓ Application submitted! ID: ${data.id} · Status: ${data.status}`);
-        form.querySelector('[name=user_id]').value = '';
-        incrementStat('Applications');
-      }
-    } catch (err) {
-      showMsg('applyMsg', 'Network error. Please try again.', true);
-    } finally {
-      btn.disabled = false; btn.textContent = 'Submit Application';
-    }
-  }
-
-  /* ── Submit Blog Post ──────────────────────────────────────────── */
-  async function submitBlog(e) {
-    e.preventDefault();
-    const form = e.target;
-    const btn  = form.querySelector('button[type=submit]');
-    const fd   = new FormData(form);
-    const body = {
-      author_id: parseInt(fd.get('author_id'), 10),
-      title: fd.get('title').trim(),
-      content: fd.get('content').trim(),
-      sample_url: fd.get('sample_url').trim() || null,
-    };
-
-    btn.disabled = true; btn.textContent = 'Publishing…';
-    try {
-      const res  = await fetch('/blog', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        showMsg('blogMsg', data.detail || 'Failed to publish article.', true);
-      } else {
-        showMsg('blogMsg', `✓ Article "${data.title}" published!`);
-        form.reset();
-        prependBlogCard(data);
-        incrementStat('Articles');
-      }
-    } catch (err) {
-      showMsg('blogMsg', 'Network error. Please try again.', true);
-    } finally {
-      btn.disabled = false; btn.textContent = 'Publish Article';
-    }
-  }
-
-  /* ── DOM helpers: prepend new cards ───────────────────────────── */
-  function prependJobCard(job) {
-    const list = document.getElementById('jobList');
-    // Remove empty-state placeholder if present
-    const placeholder = list.querySelector('.border-dashed');
-    if (placeholder) placeholder.closest('div')?.remove();
-
+  function appendJobCard(job) {
+    const list = document.getElementById('job-list');
     const article = document.createElement('article');
-    article.className = 'card-hover bg-surface-800 border border-surface-600 rounded-2xl p-6 group fade-in';
+    article.className = 'glass rounded-xl p-5 card-hover animate-in';
+    article.dataset.jobId = job.id;
     article.innerHTML = `
       <div class="flex items-start justify-between gap-4">
         <div class="flex-1 min-w-0">
-          <div class="flex items-center gap-2 mb-1">
-            <span class="text-xs font-medium bg-brand-500/10 text-brand-400 border border-brand-500/20 rounded-full px-2.5 py-0.5">Remote</span>
-            <span class="text-xs text-gray-500">${fmtDate(job.created_at)}</span>
-          </div>
-          <h3 class="text-lg font-semibold text-gray-100 truncate">${escHtml(job.title)}</h3>
-          <p class="text-sm text-brand-400 font-medium mt-0.5">${escHtml(job.company)}</p>
-          <p class="text-sm text-gray-400 mt-2 line-clamp-2">${escHtml(job.description)}</p>
-          ${job.requirements ? `<p class="text-xs text-gray-500 mt-2 line-clamp-1"><span class="text-gray-400">Requirements:</span> ${escHtml(job.requirements)}</p>` : ''}
+          <h3 class="font-semibold text-white text-base truncate">${esc(job.title)}</h3>
+          <p class="text-brand-400 text-sm font-medium mt-0.5">${esc(job.company)}</p>
+          <p class="text-slate-400 text-sm mt-2 line-clamp-2">${esc(job.description)}</p>
+          ${job.requirements ? `<p class="text-slate-500 text-xs mt-1 line-clamp-1"><span class="text-slate-400 font-medium">Req:</span> ${esc(job.requirements)}</p>` : ''}
         </div>
-        <button
-          onclick="openApplyModal(${job.id}, '${escAttr(job.title)}', '${escAttr(job.company)}')"
-          class="shrink-0 px-4 py-2 rounded-lg bg-brand-500/10 border border-brand-500/30 text-brand-400 text-sm font-medium hover:bg-brand-500 hover:text-white transition-all">
-          Apply
-        </button>
-      </div>`;
-    list.prepend(article);
-  }
-
-  function prependBlogCard(post) {
-    const list = document.getElementById('blogList');
-    const placeholder = list.querySelector('.border-dashed');
-    if (placeholder) placeholder.closest('div')?.remove();
-
-    // We don't have the author name from the API response alone; show 'You'
-    const article = document.createElement('article');
-    article.className = 'card-hover bg-surface-800 border border-surface-600 rounded-2xl p-5 group fade-in';
-    article.innerHTML = `
-      <div class="flex items-center gap-2 mb-2">
-        <div class="w-6 h-6 rounded-full bg-gradient-to-br from-purple-400 to-pink-500 flex items-center justify-center text-white text-xs font-bold">Y</div>
-        <span class="text-xs text-gray-400 font-medium">You</span>
-        <span class="text-xs text-gray-600">· Just now</span>
+        <div class="flex flex-col items-end gap-2 shrink-0">
+          <span class="badge badge-pending">Open</span>
+          <button onclick="openApplyModal(${job.id}, '${esc(job.title).replace(/'/g,"\\'")}') " class="btn-primary text-xs px-3 py-1.5 whitespace-nowrap">Apply →</button>
+        </div>
       </div>
-      <h3 class="text-base font-semibold text-gray-100 group-hover:text-brand-400 transition-colors leading-snug">${escHtml(post.title)}</h3>
-      <p class="text-sm text-gray-500 mt-1.5 line-clamp-3">${escHtml(post.content)}</p>
-      ${post.sample_url ? `
-      <a href="${escHtml(post.sample_url)}" target="_blank" rel="noopener noreferrer"
-         class="inline-flex items-center gap-1 text-xs text-purple-400 hover:text-purple-300 mt-2 transition-colors">
-        Read full article
-        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
-      </a>` : ''}`;
+      <div class="flex items-center gap-3 mt-3 pt-3 border-t border-slate-700/50 text-xs text-slate-500">
+        <span>📧 ${esc(job.contact_email)}</span>
+        <span>·</span>
+        <span>${fmtDate(job.created_at)}</span>
+      </div>
+    `;
     list.prepend(article);
   }
 
-  /* ── Stat counter update ───────────────────────────────────────── */
-  function incrementStat(label) {
-    const el = document.querySelector(`[data-stat="${label}"]`);
-    if (el) el.textContent = parseInt(el.textContent || '0', 10) + 1;
+  /* ── APPLY ── */
+  function openApplyModal(jobId, jobTitle) {
+    document.getElementById('apply-job-id').value = jobId;
+    document.getElementById('apply-job-title').textContent = jobTitle;
+    const msgEl = document.getElementById('apply-msg');
+    msgEl.classList.add('hidden');
+    msgEl.textContent = '';
+    openModal('applyModal');
   }
 
-  /* ── Security: HTML escaping ───────────────────────────────────── */
-  function escHtml(str) {
-    const div = document.createElement('div');
-    div.appendChild(document.createTextNode(str || ''));
-    return div.innerHTML;
+  async function submitApply() {
+    const job_id = parseInt(document.getElementById('apply-job-id').value);
+    const user_id = parseInt(document.getElementById('apply-user-id').value);
+    if (!user_id) { showMsg('apply-msg', 'Please enter your user ID.', false); return; }
+    try {
+      const res = await fetch(`/jobs/${job_id}/apply`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ job_id, user_id }),
+      });
+      const data = await res.json();
+      if (!res.ok) { showMsg('apply-msg', data.detail || 'Application failed.', false); return; }
+      showMsg('apply-msg', `Application submitted! Application ID: #${data.id}. Status: ${data.status}.`, true);
+      showToast('Application submitted successfully! ✅');
+      document.getElementById('apply-user-id').value = '';
+    } catch(e) { showMsg('apply-msg', 'Network error. Please try again.', false); }
   }
-  function escAttr(str) {
-    return (str || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+
+  /* ── BLOG ── */
+  async function submitBlog() {
+    const author_id = parseInt(document.getElementById('blog-author').value);
+    const title = document.getElementById('blog-title').value.trim();
+    const content = document.getElementById('blog-content').value.trim();
+    const sample_url = document.getElementById('blog-url').value.trim();
+    if (!author_id || !title || !content) {
+      showMsg('blog-msg', 'Author ID, title, and content are required.', false); return;
+    }
+    const body = { author_id, title, content };
+    if (sample_url) body.sample_url = sample_url;
+    try {
+      const res = await fetch('/blog', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      const data = await res.json();
+      if (!res.ok) { showMsg('blog-msg', data.detail || 'Failed to publish.', false); return; }
+      showMsg('blog-msg', `Article "${data.title}" published!`, true);
+      appendBlogCard(data, author_id);
+      ['blog-title','blog-content','blog-url'].forEach(id => document.getElementById(id).value = '');
+      document.getElementById('blog-author').value = '';
+      const ph = document.getElementById('no-posts-placeholder');
+      if (ph) ph.remove();
+      showToast('Article published! ✍️');
+    } catch(e) { showMsg('blog-msg', 'Network error. Please try again.', false); }
+  }
+
+  function appendBlogCard(post, authorId) {
+    const list = document.getElementById('blog-list');
+    const article = document.createElement('article');
+    article.className = 'glass rounded-xl p-5 card-hover animate-in';
+    article.innerHTML = `
+      <h3 class="font-semibold text-white text-sm leading-snug">${esc(post.title)}</h3>
+      <p class="text-slate-400 text-xs mt-1 mb-2 line-clamp-3">${esc(post.content)}</p>
+      <div class="flex items-center justify-between mt-3 pt-3 border-t border-slate-700/50 text-xs text-slate-500">
+        <span class="text-brand-400 font-medium">User #${authorId}</span>
+        <div class="flex items-center gap-2">
+          ${post.sample_url ? `<a href="${esc(post.sample_url)}" target="_blank" rel="noopener" class="text-brand-400 hover:text-brand-300 transition-colors underline underline-offset-2">Sample ↗</a><span>·</span>` : ''}
+          <span>${fmtDate(post.created_at)}</span>
+        </div>
+      </div>
+    `;
+    list.prepend(article);
+  }
+
+  /* ── XSS helper ── */
+  function esc(str) {
+    if (!str) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
   }
 </script>
-
 </body>
 </html>
