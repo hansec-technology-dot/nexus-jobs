@@ -5,6 +5,7 @@ from sqlalchemy import (
     Column,
     DateTime,
     ForeignKey,
+    Index,
     Integer,
     String,
     Text,
@@ -16,13 +17,10 @@ from database import Base
 
 
 def _utcnow():
-    """Return current UTC datetime (timezone-aware)."""
-    return datetime.now(timezone.utc)
+    """Return current UTC datetime (timezone-naive for SQLite compatibility)."""
+    return datetime.now(timezone.utc).replace(tzinfo=None)
 
 
-# ---------------------------------------------------------------------------
-# User
-# ---------------------------------------------------------------------------
 class User(Base):
     __tablename__ = "users"
 
@@ -31,55 +29,63 @@ class User(Base):
     email = Column(String(255), unique=True, nullable=False, index=True)
 
     # Allowed roles: job_seeker, employer, writer, referrer
-    # Use a CheckConstraint so SQLite enforces it at DB level.
     role = Column(
         String(20),
         nullable=False,
         default="job_seeker",
     )
 
-    # Self-referencing FK: tracks which existing user referred this user.
-    # ON DELETE SET NULL — if the referrer is ever deleted, we lose the link
-    # but keep the referred user record intact.
+    # Self-referencing FK: which existing user referred this user.
+    # ON DELETE SET NULL: if the referrer is deleted, referrer_id becomes NULL
+    # so the referred user record is preserved (important for fee traceability).
     referrer_id = Column(
         Integer,
         ForeignKey("users.id", ondelete="SET NULL"),
         nullable=True,
     )
 
-    created_at = Column(DateTime(timezone=True), default=_utcnow, nullable=False)
+    created_at = Column(DateTime, default=_utcnow, nullable=False)
 
-    # Self-referencing relationship
+    # Self-referencing relationship: one referrer -> many referred users
     referrals = relationship(
         "User",
-        backref="referrer",  # user.referrer -> the User who referred this user
+        backref="referrer",
         foreign_keys=[referrer_id],
-        # Do NOT cascade delete; referred users survive referrer deletion.
+        lazy="select",
     )
 
-    # One user (writer/job_seeker) can author many blog posts
-    blog_posts = relationship("BlogPost", back_populates="author")
+    # Employer's posted jobs (posted_by_id -> User)
+    posted_jobs = relationship(
+        "Job",
+        back_populates="posted_by",
+        foreign_keys="Job.posted_by_id",
+        lazy="select",
+    )
 
-    # One job_seeker user can have many applications
-    applications = relationship("Application", back_populates="applicant")
+    # Job seeker's applications
+    applications = relationship(
+        "Application",
+        back_populates="applicant",
+        cascade="all, delete-orphan",  # removing user removes their applications
+        lazy="select",
+    )
 
-    # Jobs posted by this employer
-    posted_jobs = relationship("Job", back_populates="posted_by")
+    # Writer's blog posts
+    blog_posts = relationship(
+        "BlogPost",
+        back_populates="author",
+        cascade="all, delete-orphan",
+        lazy="select",
+    )
 
     __table_args__ = (
         CheckConstraint(
-            "role IN ('job_seeker', 'employer', 'writer', 'referrer')",
-            name="chk_user_role",
+            role.in_(["job_seeker", "employer", "writer", "referrer"]),
+            name="ck_user_role",
         ),
     )
 
-    def __repr__(self):
-        return f"<User id={self.id} email={self.email!r} role={self.role!r}>"
 
-
-# ---------------------------------------------------------------------------
-# Job
-# ---------------------------------------------------------------------------
 class Job(Base):
     __tablename__ = "jobs"
 
@@ -90,115 +96,98 @@ class Job(Base):
     requirements = Column(Text, nullable=True)
     contact_email = Column(String(255), nullable=False)
 
-    # ON DELETE SET NULL: if the employer user is deleted, the job listing
-    # remains visible but loses the employer association. This preserves
-    # historical job data and application traceability.
+    # ON DELETE SET NULL: if the employer account is deleted, the job listing
+    # is preserved for historical/traceability purposes but loses its owner link.
     posted_by_id = Column(
         Integer,
         ForeignKey("users.id", ondelete="SET NULL"),
         nullable=True,
-        index=True,
     )
 
-    created_at = Column(DateTime(timezone=True), default=_utcnow, nullable=False)
+    created_at = Column(DateTime, default=_utcnow, nullable=False)
 
-    # Relationships
-    posted_by = relationship("User", back_populates="posted_jobs")
+    posted_by = relationship(
+        "User",
+        back_populates="posted_jobs",
+        foreign_keys=[posted_by_id],
+    )
+
     applications = relationship(
         "Application",
         back_populates="job",
-        cascade="all, delete-orphan",  # Deleting a job removes its applications
+        cascade="all, delete-orphan",
+        lazy="select",
     )
 
-    def __repr__(self):
-        return f"<Job id={self.id} title={self.title!r} company={self.company!r}>"
 
-
-# ---------------------------------------------------------------------------
-# Application
-# ---------------------------------------------------------------------------
 class Application(Base):
     """
-    Business-critical model: every application is permanently logged here.
-    Traceability: job_id + user_id + applied_at + status forms the audit trail
-    used for placement fee collection when status transitions to 'secured'.
+    Business-critical model: every job application is logged here.
+    Placements (fee collection) are traced via status transitions:
+      pending  -> secured (placement confirmed, fee applies)
+      secured  -> closed  (placement finalized / contract ended)
+      pending  -> closed  (application withdrawn or rejected)
+
+    applied_at is immutable once set (set at creation).
     """
 
     __tablename__ = "applications"
 
     id = Column(Integer, primary_key=True, index=True)
 
-    # RESTRICT delete on job_id — do not silently lose application records.
-    # In practice, deactivate jobs instead of deleting them.
     job_id = Column(
         Integer,
-        ForeignKey("jobs.id", ondelete="CASCADE"),  # cascade from Job.applications above
+        ForeignKey("jobs.id", ondelete="CASCADE"),
         nullable=False,
-        index=True,
     )
 
-    # ON DELETE RESTRICT (default) — do not allow deleting a user who has
-    # applications, preserving the placement audit trail.
+    # ON DELETE CASCADE from User: if user is fully removed, their applications
+    # are also removed. For stricter traceability, change to SET NULL and allow
+    # nullable user_id — uncomment the block below and adjust cascade.
     user_id = Column(
         Integer,
-        ForeignKey("users.id", ondelete="RESTRICT"),
+        ForeignKey("users.id", ondelete="CASCADE"),
         nullable=False,
-        index=True,
     )
 
-    # Lifecycle: pending -> secured (placement confirmed) or closed (rejected/withdrawn)
-    status = Column(
-        String(20),
-        nullable=False,
-        default="pending",
-    )
+    status = Column(String(10), nullable=False, default="pending")
 
-    # Business-critical: exact UTC timestamp of application submission
-    applied_at = Column(DateTime(timezone=True), default=_utcnow, nullable=False)
+    # applied_at is the authoritative timestamp for placement tracing.
+    applied_at = Column(DateTime, default=_utcnow, nullable=False)
 
-    # Relationships
     job = relationship("Job", back_populates="applications")
     applicant = relationship("User", back_populates="applications")
 
     __table_args__ = (
-        # Prevent duplicate applications from the same user to the same job
+        # Prevent duplicate applications from same user to same job
         UniqueConstraint("job_id", "user_id", name="uq_application_job_user"),
         CheckConstraint(
-            "status IN ('pending', 'secured', 'closed')",
-            name="chk_application_status",
+            status.in_(["pending", "secured", "closed"]),
+            name="ck_application_status",
         ),
+        # Indexes for fast traceability queries
+        Index("ix_application_job_id", "job_id"),
+        Index("ix_application_user_id", "user_id"),
+        Index("ix_application_status", "status"),
     )
 
-    def __repr__(self):
-        return (
-            f"<Application id={self.id} job_id={self.job_id} "
-            f"user_id={self.user_id} status={self.status!r}>"
-        )
 
-
-# ---------------------------------------------------------------------------
-# BlogPost
-# ---------------------------------------------------------------------------
 class BlogPost(Base):
     __tablename__ = "blog_posts"
 
     id = Column(Integer, primary_key=True, index=True)
 
-    # ON DELETE SET NULL: if the author is deleted, keep the blog post
-    # (editorial content should survive user account removal).
+    # ON DELETE CASCADE: if the author account is removed, their posts go too.
+    # Change to SET NULL + nullable author_id if you want to preserve orphaned posts.
     author_id = Column(
         Integer,
-        ForeignKey("users.id", ondelete="SET NULL"),
-        nullable=True,
-        index=True,
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
     )
 
     title = Column(String(255), nullable=False)
     content = Column(Text, nullable=False)
-    sample_url = Column(String(512), nullable=True)  # e.g. link to published article
-    created_at = Column(DateTime(timezone=True), default=_utcnow, nullable=False)
+    sample_url = Column(String(512), nullable=True)  # optional portfolio/sample link
+    created_at = Column(DateTime, default=_utcnow, nullable=False)
 
     author = relationship("User", back_populates="blog_posts")
-
-    def __repr__(self):
-        return f"<BlogPost id={self.id} title={self.title!r}>"
