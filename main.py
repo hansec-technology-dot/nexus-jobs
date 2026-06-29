@@ -1,14 +1,12 @@
 """
-Remote Work Insider — main FastAPI application entry point.
+Remote Work Insider — unified FastAPI application.
+Run: uvicorn main:app --reload
+Tables are created automatically on first run via init_db().
 
-Run locally:
-    pip install fastapi uvicorn sqlalchemy jinja2 pydantic[email]
-    python -m uvicorn main:app --reload
-
-For Render deployment:
-    - Set DATABASE_URL env var to your PostgreSQL connection string in database.py
-    - Add a build command: pip install -r requirements.txt
-    - Start command: uvicorn main:app --host 0.0.0.0 --port $PORT
+Extension points:
+  - Add JWT/OAuth2 authentication by injecting a `current_user` dependency.
+  - Swap SQLite URL in database.py for PostgreSQL when deploying to Render.
+  - Add Alembic for schema migrations once the schema stabilises.
 """
 
 import os
@@ -26,87 +24,80 @@ import schemas
 from database import get_db, init_db
 
 # ---------------------------------------------------------------------------
-# App setup
+# App bootstrap
 # ---------------------------------------------------------------------------
 
 app = FastAPI(
     title="Remote Work Insider",
-    description="Job board, applicant tracking, referral network, and writers' corner.",
+    description="Unified job board, referral tracker, and writers' corner for remote workers.",
     version="1.0.0",
 )
 
-# CORS — allow all origins for local dev; tighten in production.
+# CORS — allow all origins for local dev; restrict to your domain in production.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # TODO: restrict to your domain in production
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Jinja2 templates directory
 templates = Jinja2Templates(directory="templates")
 
-
-# ---------------------------------------------------------------------------
-# Startup: create tables
-# ---------------------------------------------------------------------------
-
-@app.on_event("startup")
-def on_startup():
-    """Create all DB tables on first run. Safe to call on every restart."""
-    init_db()
+# Create tables on startup (idempotent — safe to call repeatedly).
+init_db()
 
 
 # ---------------------------------------------------------------------------
-# Helper utilities
+# Helpers
 # ---------------------------------------------------------------------------
 
-def _get_user_or_404(user_id: int, db: Session) -> models.User:
+
+def _get_user_or_404(db: Session, user_id: int) -> models.User:
     user = db.query(models.User).filter(models.User.id == user_id).first()
     if not user:
-        raise HTTPException(status_code=404, detail=f"User {user_id} not found.")
+        raise HTTPException(status_code=404, detail=f"User {user_id} not found")
     return user
 
 
-def _get_job_or_404(job_id: int, db: Session) -> models.Job:
+def _get_job_or_404(db: Session, job_id: int) -> models.Job:
     job = db.query(models.Job).filter(models.Job.id == job_id).first()
     if not job:
-        raise HTTPException(status_code=404, detail=f"Job {job_id} not found.")
+        raise HTTPException(status_code=404, detail=f"Job {job_id} not found")
     return job
 
 
 # ---------------------------------------------------------------------------
-# Page route — server-side rendered
+# Page route
 # ---------------------------------------------------------------------------
 
-@app.get("/", response_class=HTMLResponse, tags=["pages"])
-def index(request: Request, db: Session = Depends(get_db)):
+
+@app.get("/", response_class=HTMLResponse)
+async def index(request: Request, db: Session = Depends(get_db)):
     """
-    Render the unified single-page application shell.
-    Initial data (jobs, blog posts) is injected server-side so the page works
-    without JavaScript and search engines can crawl it.
+    Server-side rendered landing page.
+    Passes initial data to Jinja2 so the page works without JavaScript too.
     """
     jobs = db.query(models.Job).order_by(models.Job.created_at.desc()).limit(50).all()
     blog_posts = (
         db.query(models.BlogPost)
         .order_by(models.BlogPost.created_at.desc())
-        .limit(20)
+        .limit(50)
         .all()
     )
 
-    # Enrich blog posts with author name
+    # Enrich blog posts with author names for the template
     enriched_posts = []
     for post in blog_posts:
-        author_name = post.author.name if post.author else "Anonymous"
+        author_name = post.author.name if post.author else "Unknown"
         enriched_posts.append(
             {
                 "id": post.id,
                 "title": post.title,
                 "content": post.content,
                 "sample_url": post.sample_url,
-                "author_name": author_name,
                 "author_id": post.author_id,
+                "author_name": author_name,
                 "created_at": post.created_at,
             }
         )
@@ -114,8 +105,9 @@ def index(request: Request, db: Session = Depends(get_db)):
     counts = {
         "jobs": db.query(models.Job).count(),
         "users": db.query(models.User).count(),
-        "applications": db.query(models.Application).count(),
-        "posts": db.query(models.BlogPost).count(),
+        "placements": db.query(models.Application)
+        .filter(models.Application.status == "secured")
+        .count(),
     }
 
     return templates.TemplateResponse(
@@ -130,8 +122,9 @@ def index(request: Request, db: Session = Depends(get_db)):
 
 
 # ---------------------------------------------------------------------------
-# User routes
+# Users
 # ---------------------------------------------------------------------------
+
 
 @app.post(
     "/register",
@@ -140,22 +133,15 @@ def index(request: Request, db: Session = Depends(get_db)):
     tags=["users"],
 )
 def register_user(payload: schemas.UserCreate, db: Session = Depends(get_db)):
-    """
-    Register a new user.
+    """Register a new user. Email must be unique. Optional referrer_id links referral chain."""
 
-    - Email must be globally unique.
-    - referrer_id, if provided, must reference an existing user.
-    - TODO: Add password hashing and JWT issuance here for auth extension.
-    """
-    # Validate referrer exists
+    # Validate referrer exists if provided
     if payload.referrer_id is not None:
-        referrer = db.query(models.User).filter(
-            models.User.id == payload.referrer_id
-        ).first()
+        referrer = db.query(models.User).filter(models.User.id == payload.referrer_id).first()
         if not referrer:
             raise HTTPException(
                 status_code=400,
-                detail=f"Referrer with id {payload.referrer_id} does not exist.",
+                detail=f"Referrer with id {payload.referrer_id} does not exist",
             )
 
     user = models.User(
@@ -172,20 +158,25 @@ def register_user(payload: schemas.UserCreate, db: Session = Depends(get_db)):
         db.rollback()
         raise HTTPException(
             status_code=400,
-            detail=f"Email '{payload.email}' is already registered.",
+            detail=f"Email '{payload.email}' is already registered",
         )
     return user
 
 
 @app.get("/users", response_model=List[schemas.UserRead], tags=["users"])
 def list_users(db: Session = Depends(get_db)):
-    """Return all registered users. Restrict to admin role in production."""
     return db.query(models.User).order_by(models.User.created_at.desc()).all()
 
 
+@app.get("/users/{user_id}", response_model=schemas.UserRead, tags=["users"])
+def get_user(user_id: int, db: Session = Depends(get_db)):
+    return _get_user_or_404(db, user_id)
+
+
 # ---------------------------------------------------------------------------
-# Job routes
+# Jobs
 # ---------------------------------------------------------------------------
+
 
 @app.post(
     "/jobs",
@@ -196,16 +187,15 @@ def list_users(db: Session = Depends(get_db)):
 def create_job(payload: schemas.JobCreate, db: Session = Depends(get_db)):
     """
     Post a new job listing.
-
-    - posted_by_id, if provided, must reference a user with role 'employer'.
-    - TODO: Enforce that only authenticated employers can post (add auth middleware).
+    If posted_by_id is provided it must reference a user with role='employer'.
+    Extension: add authentication dependency here to auto-derive posted_by from token.
     """
     if payload.posted_by_id is not None:
-        employer = _get_user_or_404(payload.posted_by_id, db)
-        if employer.role != "employer":
+        poster = _get_user_or_404(db, payload.posted_by_id)
+        if poster.role != "employer":
             raise HTTPException(
                 status_code=400,
-                detail=f"User {payload.posted_by_id} is not an employer (role={employer.role!r}).",
+                detail="Only users with role 'employer' can post jobs",
             )
 
     job = models.Job(
@@ -224,18 +214,18 @@ def create_job(payload: schemas.JobCreate, db: Session = Depends(get_db)):
 
 @app.get("/jobs", response_model=List[schemas.JobRead], tags=["jobs"])
 def list_jobs(db: Session = Depends(get_db)):
-    """Return all active job listings ordered by most recent."""
     return db.query(models.Job).order_by(models.Job.created_at.desc()).all()
 
 
 @app.get("/jobs/{job_id}", response_model=schemas.JobRead, tags=["jobs"])
 def get_job(job_id: int, db: Session = Depends(get_db)):
-    return _get_job_or_404(job_id, db)
+    return _get_job_or_404(db, job_id)
 
 
 # ---------------------------------------------------------------------------
-# Application routes
+# Applications
 # ---------------------------------------------------------------------------
+
 
 @app.post(
     "/jobs/{job_id}/apply",
@@ -243,34 +233,35 @@ def get_job(job_id: int, db: Session = Depends(get_db)):
     status_code=status.HTTP_201_CREATED,
     tags=["applications"],
 )
-def apply_to_job(
+def apply_for_job(
     job_id: int,
     payload: schemas.ApplicationCreate,
     db: Session = Depends(get_db),
 ):
     """
-    Submit a job application.
-
-    Business rules:
-    - The job must exist.
-    - The applicant (user_id) must exist.
-    - Applicant role must be 'job_seeker' or 'writer' (writers can seek contract work).
-    - Duplicate applications (same job + user) are rejected with HTTP 400.
-    - applied_at is set to UTC now — this timestamp is the placement audit anchor.
+    Create a job application. Validates:
+    - Job exists
+    - User exists and has an appropriate role (job_seeker or writer)
+    - No duplicate application for the same (job, user) pair
+    Business rule: applied_at is authoritative for fee/placement tracing.
     """
-    _get_job_or_404(job_id, db)
+    _get_job_or_404(db, job_id)
 
-    applicant = _get_user_or_404(payload.user_id, db)
+    # Ensure job_id in path matches payload for consistency
+    if payload.job_id != job_id:
+        raise HTTPException(
+            status_code=400,
+            detail="job_id in URL and request body must match",
+        )
+
+    applicant = _get_user_or_404(db, payload.user_id)
     if applicant.role not in ("job_seeker", "writer"):
         raise HTTPException(
             status_code=400,
-            detail=(
-                f"User role '{applicant.role}' cannot apply to jobs. "
-                "Only 'job_seeker' or 'writer' roles may apply."
-            ),
+            detail=f"Users with role '{applicant.role}' cannot apply for jobs",
         )
 
-    # Check for duplicate
+    # Check for duplicate application
     existing = (
         db.query(models.Application)
         .filter(
@@ -282,7 +273,7 @@ def apply_to_job(
     if existing:
         raise HTTPException(
             status_code=400,
-            detail=f"User {payload.user_id} has already applied to job {job_id}.",
+            detail="You have already applied for this job",
         )
 
     application = models.Application(
@@ -296,14 +287,11 @@ def apply_to_job(
         db.refresh(application)
     except IntegrityError:
         db.rollback()
-        raise HTTPException(
-            status_code=400,
-            detail="Duplicate application detected.",
-        )
+        raise HTTPException(status_code=400, detail="Duplicate application")
     return application
 
 
-@app.post(
+@app.patch(
     "/applications/{application_id}/status",
     response_model=schemas.ApplicationRead,
     tags=["applications"],
@@ -314,93 +302,69 @@ def update_application_status(
     db: Session = Depends(get_db),
 ):
     """
-    Transition an application's lifecycle status.
-
+    Transition application status.
     Allowed transitions:
       pending  -> secured | closed
       secured  -> closed
-      closed   -> (terminal — no further transitions)
-
-    TODO: Add role-based authorization so only the employer who posted the job
-    can mark applications as 'secured' (placement confirmed for fee collection).
+    Extension: restrict this endpoint to employer role via auth dependency.
     """
-    app_obj = (
+    application = (
         db.query(models.Application)
         .filter(models.Application.id == application_id)
         .first()
     )
-    if not app_obj:
-        raise HTTPException(
-            status_code=404, detail=f"Application {application_id} not found."
-        )
-
-    current = app_obj.status
-    new = payload.status
+    if not application:
+        raise HTTPException(status_code=404, detail="Application not found")
 
     # Enforce allowed transitions
-    allowed_transitions = {
+    allowed: dict = {
         "pending": {"secured", "closed"},
         "secured": {"closed"},
         "closed": set(),
     }
-    if new not in allowed_transitions.get(current, set()):
+    if payload.status not in allowed.get(application.status, set()):
         raise HTTPException(
             status_code=400,
             detail=(
-                f"Cannot transition application from '{current}' to '{new}'. "
-                f"Allowed: {sorted(allowed_transitions.get(current, set()))}."
+                f"Cannot transition from '{application.status}' to '{payload.status}'. "
+                f"Allowed: {sorted(allowed.get(application.status, set())) or 'none'}"
             ),
         )
 
-    app_obj.status = new
+    application.status = payload.status
     db.commit()
-    db.refresh(app_obj)
-    return app_obj
+    db.refresh(application)
+    return application
 
 
-@app.get(
-    "/applications",
-    response_model=List[schemas.ApplicationRead],
-    tags=["applications"],
-)
+@app.get("/applications", response_model=List[schemas.ApplicationRead], tags=["applications"])
 def list_applications(
     job_id: Optional[int] = None,
     user_id: Optional[int] = None,
     status: Optional[str] = None,
     db: Session = Depends(get_db),
 ):
-    """
-    Return applications filtered by any combination of job_id, user_id, status.
-    Used by employers to review applicants and by the platform to audit placements.
-    """
+    """List applications with optional filters for placement traceability."""
     query = db.query(models.Application)
     if job_id is not None:
         query = query.filter(models.Application.job_id == job_id)
     if user_id is not None:
         query = query.filter(models.Application.user_id == user_id)
     if status is not None:
-        if status not in schemas.VALID_STATUSES:
-            raise HTTPException(
-                status_code=400,
-                detail=f"Invalid status filter. Must be one of {sorted(schemas.VALID_STATUSES)}.",
-            )
+        if status not in ("pending", "secured", "closed"):
+            raise HTTPException(status_code=400, detail="Invalid status filter")
         query = query.filter(models.Application.status == status)
-
     return query.order_by(models.Application.applied_at.desc()).all()
 
 
 # ---------------------------------------------------------------------------
-# Blog routes
+# Blog
 # ---------------------------------------------------------------------------
+
 
 @app.get("/blog", response_model=List[schemas.BlogPostRead], tags=["blog"])
 def list_blog_posts(db: Session = Depends(get_db)):
-    """Return all published blog posts ordered by most recent."""
-    return (
-        db.query(models.BlogPost)
-        .order_by(models.BlogPost.created_at.desc())
-        .all()
-    )
+    return db.query(models.BlogPost).order_by(models.BlogPost.created_at.desc()).all()
 
 
 @app.post(
@@ -411,21 +375,14 @@ def list_blog_posts(db: Session = Depends(get_db)):
 )
 def create_blog_post(payload: schemas.BlogPostCreate, db: Session = Depends(get_db)):
     """
-    Submit a new blog post.
-
-    - author_id must reference an existing user.
-    - Allowed roles for authoring: 'writer' or 'job_seeker' (job seekers may share
-      career stories — tighten to 'writer' only if desired).
-    - TODO: Add content moderation / approval workflow before publishing.
+    Publish a blog post. Author must be a registered user.
+    Writers and job_seekers may post. Extend with auth to auto-derive author.
     """
-    author = _get_user_or_404(payload.author_id, db)
+    author = _get_user_or_404(db, payload.author_id)
     if author.role not in ("writer", "job_seeker", "referrer"):
         raise HTTPException(
             status_code=400,
-            detail=(
-                f"User role '{author.role}' is not permitted to publish blog posts. "
-                "Allowed roles: writer, job_seeker, referrer."
-            ),
+            detail=f"Users with role '{author.role}' cannot publish blog posts",
         )
 
     post = models.BlogPost(
