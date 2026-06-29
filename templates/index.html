@@ -1,1375 +1,717 @@
 <!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
+<html lang="en" class="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Festu.S Jobs — Where Talent Meets Opportunity</title>
+  <title>Remote Work Insider</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
-
   <script>
     tailwind.config = {
       darkMode: 'class',
       theme: {
         extend: {
-          fontFamily: {
-            sans: ['Inter', 'sans-serif'],
-            display: ['Space Grotesk', 'sans-serif'],
-          },
           colors: {
+            brand: {
+              50:  '#f0f9ff',
+              400: '#38bdf8',
+              500: '#0ea5e9',
+              600: '#0284c7',
+              700: '#0369a1',
+            },
             surface: {
-              DEFAULT: '#0d0f14',
-              1: '#13161e',
-              2: '#1a1e28',
-              3: '#212532',
-            },
-            accent: {
-              DEFAULT: '#6c63ff',
-              hover: '#5a52e0',
-              glow: 'rgba(108,99,255,0.35)',
-            },
-            teal: {
-              neon: '#00d4b8',
-              dim: 'rgba(0,212,184,0.15)',
-            },
-            amber: {
-              neon: '#ffb347',
-              dim: 'rgba(255,179,71,0.15)',
-            },
-            muted: '#6b7280',
-            border: 'rgba(255,255,255,0.07)',
+              900: '#0f1117',
+              800: '#161b27',
+              700: '#1e2535',
+              600: '#252d40',
+              500: '#2e3951',
+            }
           },
-          boxShadow: {
-            'glow-purple': '0 0 40px rgba(108,99,255,0.25)',
-            'glow-teal': '0 0 40px rgba(0,212,184,0.2)',
-            'card': '0 4px 24px rgba(0,0,0,0.4)',
-          },
-          backgroundImage: {
-            'hero-grid': "radial-gradient(circle at 1px 1px, rgba(255,255,255,0.04) 1px, transparent 0)",
-            'gradient-radial': 'radial-gradient(ellipse at center, var(--tw-gradient-stops))',
-          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+          }
         }
       }
     }
   </script>
-
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <style>
-    * { box-sizing: border-box; }
-    body {
-      background-color: #0d0f14;
-      color: #e2e8f0;
-      font-family: 'Inter', sans-serif;
-      -webkit-font-smoothing: antialiased;
-    }
-    .font-display { font-family: 'Space Grotesk', sans-serif; }
-
-    /* Grid overlay on hero */
-    .hero-bg {
-      background-color: #0d0f14;
-      background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,0.04) 1px, transparent 0);
-      background-size: 32px 32px;
-    }
-    /* Purple glow orb */
-    .orb {
-      position: absolute;
-      border-radius: 50%;
-      filter: blur(120px);
-      pointer-events: none;
-    }
-    /* Card shimmer border */
-    .card-glass {
-      background: rgba(26,30,40,0.7);
-      border: 1px solid rgba(255,255,255,0.07);
-      backdrop-filter: blur(12px);
-    }
-    /* Neon pill tag */
-    .tag-purple { background: rgba(108,99,255,0.15); color: #a89dff; border: 1px solid rgba(108,99,255,0.3); }
-    .tag-teal   { background: rgba(0,212,184,0.12); color: #5ef2e0; border: 1px solid rgba(0,212,184,0.3); }
-    .tag-amber  { background: rgba(255,179,71,0.12); color: #ffd08a; border: 1px solid rgba(255,179,71,0.3); }
-    .tag-rose   { background: rgba(244,63,94,0.12);  color: #fb7185; border: 1px solid rgba(244,63,94,0.3); }
-
-    /* Smooth tab underline */
-    .tab-btn { transition: color 0.2s, border-color 0.2s; }
-    .tab-btn.active { color: #6c63ff; border-bottom: 2px solid #6c63ff; }
-
-    /* Spinner */
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .spinner { animation: spin 0.8s linear infinite; }
-
-    /* Toast */
-    #toast {
-      transition: opacity 0.3s, transform 0.3s;
-    }
-    #toast.hidden { opacity: 0; pointer-events: none; transform: translateY(8px); }
-
-    /* Stats counter fade-in */
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(20px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-    .fade-up { animation: fadeUp 0.6s ease forwards; }
-    .delay-1 { animation-delay: 0.1s; }
-    .delay-2 { animation-delay: 0.2s; }
-    .delay-3 { animation-delay: 0.3s; }
-
+    /* Scrollbar styling */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #0f1117; }
+    ::-webkit-scrollbar-thumb { background: #2e3951; border-radius: 3px; }
+    /* Modal backdrop */
+    .modal-backdrop { backdrop-filter: blur(4px); }
     /* Gradient text */
     .gradient-text {
-      background: linear-gradient(135deg, #6c63ff 0%, #00d4b8 100%);
+      background: linear-gradient(135deg, #38bdf8 0%, #818cf8 50%, #c084fc 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
     }
-
-    input, textarea, select {
-      background: rgba(26,30,40,0.8) !important;
-      border: 1px solid rgba(255,255,255,0.1) !important;
-      color: #e2e8f0 !important;
-      transition: border-color 0.2s;
+    /* Card hover effect */
+    .card-hover {
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
-    input:focus, textarea:focus, select:focus {
-      outline: none !important;
-      border-color: #6c63ff !important;
-      box-shadow: 0 0 0 3px rgba(108,99,255,0.2) !important;
-    }
-    input::placeholder, textarea::placeholder { color: #4b5563 !important; }
-
-    .btn-primary {
-      background: linear-gradient(135deg, #6c63ff, #5a52e0);
-      transition: box-shadow 0.2s, transform 0.15s;
-    }
-    .btn-primary:hover {
-      box-shadow: 0 0 24px rgba(108,99,255,0.5);
-      transform: translateY(-1px);
-    }
-    .btn-primary:active { transform: translateY(0); }
-
-    .btn-outline {
-      border: 1px solid rgba(108,99,255,0.5);
-      color: #a89dff;
-      transition: background 0.2s, border-color 0.2s;
-    }
-    .btn-outline:hover { background: rgba(108,99,255,0.1); border-color: #6c63ff; }
-
-    /* Job card hover */
-    .job-card {
-      transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
-    }
-    .job-card:hover {
-      border-color: rgba(108,99,255,0.4) !important;
-      box-shadow: 0 0 32px rgba(108,99,255,0.12);
+    .card-hover:hover {
       transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(56, 189, 248, 0.08);
     }
-
-    /* Scrollbar */
-    ::-webkit-scrollbar { width: 6px; }
-    ::-webkit-scrollbar-track { background: #0d0f14; }
-    ::-webkit-scrollbar-thumb { background: rgba(108,99,255,0.4); border-radius: 3px; }
+    /* Status badge colors */
+    .status-pending  { background: rgba(251,191,36,0.15); color: #fbbf24; border: 1px solid rgba(251,191,36,0.3); }
+    .status-secured  { background: rgba(52,211,153,0.15); color: #34d399; border: 1px solid rgba(52,211,153,0.3); }
+    .status-closed   { background: rgba(156,163,175,0.15); color: #9ca3af; border: 1px solid rgba(156,163,175,0.3); }
+    /* Smooth fade-in */
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .fade-in { animation: fadeInUp 0.35s ease forwards; }
+    /* Form input focus ring */
+    .form-input:focus { outline: none; box-shadow: 0 0 0 2px rgba(56,189,248,0.4); }
   </style>
 </head>
 
-<body class="min-h-screen">
+<body class="bg-surface-900 text-gray-100 font-sans min-h-screen">
 
-  <!-- =====================================================================
-       TOAST NOTIFICATION
-  ====================================================================== -->
-  <div id="toast" class="hidden fixed top-5 right-5 z-50 card-glass rounded-xl px-5 py-4 flex items-center gap-3 shadow-card max-w-sm">
-    <span id="toast-icon" class="text-lg">✅</span>
-    <span id="toast-msg" class="text-sm font-medium text-slate-200"></span>
-  </div>
-
-  <!-- =====================================================================
-       NAVBAR
-  ====================================================================== -->
-  <nav class="fixed top-0 left-0 right-0 z-40 card-glass border-b border-border">
-    <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-      <!-- Logo -->
-      <a href="#" class="flex items-center gap-2.5">
-        <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-[#6c63ff] to-[#00d4b8] flex items-center justify-center shadow-glow-purple">
-          <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-            <path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-          </svg>
-        </div>
-        <span class="font-display font-bold text-xl text-white tracking-tight">Festu.S<span class="gradient-text">Jobs</span></span>
-      </a>
-
-      <!-- Nav Links -->
-      <div class="hidden md:flex items-center gap-7 text-sm font-medium text-slate-400">
-        <a href="#jobs" class="hover:text-white transition-colors">Browse Jobs</a>
-        <a href="#employers" class="hover:text-white transition-colors">For Employers</a>
-        <a href="#referrals" class="hover:text-white transition-colors">Referrals</a>
-        <a href="#platform-stats" class="hover:text-white transition-colors">Stats</a>
-      </div>
-
-      <!-- CTA buttons -->
+<!-- ═══════════════════════════════════════════════════════ HEADER ═══ -->
+<header class="sticky top-0 z-40 border-b border-surface-600 bg-surface-900/90 backdrop-blur-md">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center justify-between h-16">
+      <!-- Brand -->
       <div class="flex items-center gap-3">
-        <button onclick="openModal('login-modal')" class="btn-outline text-sm font-semibold px-4 py-2 rounded-lg">
-          Sign In
+        <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-400 to-purple-500 flex items-center justify-center text-white font-bold text-sm">R</div>
+        <span class="text-xl font-bold gradient-text">Remote Work Insider</span>
+      </div>
+      <!-- Nav links (desktop) -->
+      <nav class="hidden md:flex items-center gap-6 text-sm text-gray-400">
+        <a href="#jobs" class="hover:text-brand-400 transition-colors">Job Board</a>
+        <a href="#blog" class="hover:text-brand-400 transition-colors">Writers' Corner</a>
+        <a href="#stats" class="hover:text-brand-400 transition-colors">Stats</a>
+      </nav>
+      <!-- CTA buttons -->
+      <div class="flex items-center gap-2">
+        <button onclick="openModal('registerModal')"
+          class="text-sm px-4 py-1.5 rounded-lg border border-surface-500 text-gray-300 hover:border-brand-400 hover:text-brand-400 transition-all">
+          Register
         </button>
-        <button onclick="openModal('register-modal')" class="btn-primary text-white text-sm font-semibold px-4 py-2 rounded-lg">
-          Get Started
+        <button onclick="openModal('postJobModal')"
+          class="text-sm px-4 py-1.5 rounded-lg bg-brand-500 hover:bg-brand-600 text-white font-medium transition-all">
+          Post a Job
         </button>
       </div>
     </div>
-  </nav>
+  </div>
+</header>
 
-  <!-- =====================================================================
-       HERO
-  ====================================================================== -->
-  <section class="hero-bg relative min-h-screen flex items-center justify-center pt-16 overflow-hidden">
-    <!-- Glow orbs -->
-    <div class="orb w-96 h-96 bg-[#6c63ff] opacity-20 top-20 -left-32"></div>
-    <div class="orb w-80 h-80 bg-[#00d4b8] opacity-15 bottom-20 -right-20"></div>
-    <div class="orb w-64 h-64 bg-[#6c63ff] opacity-10 bottom-40 left-1/4"></div>
-
-    <div class="relative z-10 max-w-5xl mx-auto px-6 text-center">
-      <!-- Eyebrow -->
-      <div class="inline-flex items-center gap-2 tag-purple text-xs font-semibold px-4 py-1.5 rounded-full mb-8">
-        <span class="w-1.5 h-1.5 rounded-full bg-[#6c63ff] animate-pulse"></span>
-        AI-Powered Job Marketplace · 3 Roles, 1 Platform
-      </div>
-
-      <!-- Headline -->
-      <h1 class="font-display font-bold text-5xl md:text-7xl text-white leading-[1.05] mb-6 tracking-tight">
-        The only platform<br/>
-        <span class="gradient-text">built for everyone</span><br/>
-        in the hiring loop.
-      </h1>
-
-      <p class="text-slate-400 text-lg md:text-xl max-w-2xl mx-auto mb-10 leading-relaxed">
-        Seekers find roles that fit. Employers build dream teams. Referrers earn by growing the network.
-        One ecosystem, zero friction.
-      </p>
-
-      <!-- CTA Row -->
-      <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
-        <button onclick="scrollToSection('jobs')" class="btn-primary text-white font-semibold px-8 py-3.5 rounded-xl text-base w-full sm:w-auto shadow-glow-purple">
-          Browse Open Roles
-        </button>
-        <button onclick="openModal('register-modal')" class="btn-outline font-semibold px-8 py-3.5 rounded-xl text-base w-full sm:w-auto">
-          Create Free Account
-        </button>
-      </div>
-
-      <!-- Role cards row -->
-      <div class="grid md:grid-cols-3 gap-4 max-w-3xl mx-auto">
-        <div class="card-glass rounded-2xl p-5 text-left group cursor-pointer" onclick="setRegisterRole('seeker')">
-          <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-[#6c63ff]/30 to-[#6c63ff]/10 flex items-center justify-center mb-4">
-            <svg class="w-5 h-5 text-[#a89dff]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
-          </div>
-          <h3 class="font-display font-semibold text-white mb-1">Job Seeker</h3>
-          <p class="text-slate-500 text-sm">Build your profile, discover your next role, apply in seconds.</p>
-          <div class="mt-3 text-[#a89dff] text-xs font-semibold group-hover:text-[#6c63ff] transition-colors">Register as Seeker →</div>
-        </div>
-
-        <div class="card-glass rounded-2xl p-5 text-left group cursor-pointer border-[#00d4b8]/20" onclick="setRegisterRole('employer')">
-          <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-[#00d4b8]/30 to-[#00d4b8]/10 flex items-center justify-center mb-4">
-            <svg class="w-5 h-5 text-[#5ef2e0]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
-          </div>
-          <h3 class="font-display font-semibold text-white mb-1">Employer</h3>
-          <p class="text-slate-500 text-sm">Post jobs, track applicants, and hire the perfect fit fast.</p>
-          <div class="mt-3 text-[#5ef2e0] text-xs font-semibold group-hover:text-[#00d4b8] transition-colors">Register as Employer →</div>
-        </div>
-
-        <div class="card-glass rounded-2xl p-5 text-left group cursor-pointer border-[#ffb347]/20" onclick="setRegisterRole('referrer')">
-          <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-[#ffb347]/30 to-[#ffb347]/10 flex items-center justify-center mb-4">
-            <svg class="w-5 h-5 text-[#ffd08a]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-          </div>
-          <h3 class="font-display font-semibold text-white mb-1">Referrer</h3>
-          <p class="text-slate-500 text-sm">Grow your network. Invite talent and companies, track your impact.</p>
-          <div class="mt-3 text-[#ffd08a] text-xs font-semibold group-hover:text-[#ffb347] transition-colors">Register as Referrer →</div>
-        </div>
-      </div>
+<!-- ═════════════════════════════════════════════════════════ HERO ═══ -->
+<section class="relative overflow-hidden border-b border-surface-700">
+  <div class="absolute inset-0 bg-gradient-to-br from-surface-800 via-surface-900 to-surface-900"></div>
+  <div class="absolute top-0 left-1/4 w-96 h-96 bg-brand-500/5 rounded-full blur-3xl pointer-events-none"></div>
+  <div class="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-500/5 rounded-full blur-3xl pointer-events-none"></div>
+  <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center">
+    <div class="inline-flex items-center gap-2 bg-surface-700 border border-surface-500 rounded-full px-4 py-1.5 text-xs text-brand-400 font-medium mb-6">
+      <span class="w-1.5 h-1.5 rounded-full bg-brand-400 animate-pulse"></span>
+      The platform for remote professionals
     </div>
-  </section>
-
-  <!-- =====================================================================
-       PLATFORM STATS BAR
-  ====================================================================== -->
-  <section id="platform-stats" class="py-16 border-t border-border">
-    <div class="max-w-6xl mx-auto px-6">
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-6" id="stats-grid">
-        <!-- Populated by JS -->
-        <div class="text-center animate-pulse">
-          <div class="h-10 bg-surface-2 rounded-lg w-24 mx-auto mb-2"></div>
-          <div class="h-4 bg-surface-2 rounded w-20 mx-auto"></div>
-        </div>
-        <div class="text-center animate-pulse">
-          <div class="h-10 bg-surface-2 rounded-lg w-24 mx-auto mb-2"></div>
-          <div class="h-4 bg-surface-2 rounded w-20 mx-auto"></div>
-        </div>
-        <div class="text-center animate-pulse">
-          <div class="h-10 bg-surface-2 rounded-lg w-24 mx-auto mb-2"></div>
-          <div class="h-4 bg-surface-2 rounded w-20 mx-auto"></div>
-        </div>
-        <div class="text-center animate-pulse">
-          <div class="h-10 bg-surface-2 rounded-lg w-24 mx-auto mb-2"></div>
-          <div class="h-4 bg-surface-2 rounded w-20 mx-auto"></div>
-        </div>
+    <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight mb-6">
+      <span class="gradient-text">Work Remotely.</span><br />
+      <span class="text-gray-100">Live Freely.</span>
+    </h1>
+    <p class="text-lg text-gray-400 max-w-2xl mx-auto mb-10">
+      Curated remote jobs, insider career stories, and a referral network that rewards your connections.
+    </p>
+    <!-- Stats bar -->
+    <div id="stats" class="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-3xl mx-auto">
+      {% set stat_items = [
+        ("💼", counts.jobs, "Jobs Listed"),
+        ("👥", counts.users, "Professionals"),
+        ("📨", counts.applications, "Applications"),
+        ("✍️", counts.posts, "Articles")
+      ] %}
+      {% for icon, val, label in stat_items %}
+      <div class="bg-surface-800 border border-surface-600 rounded-xl p-4">
+        <div class="text-2xl mb-1">{{ icon }}</div>
+        <div class="text-2xl font-bold text-brand-400" data-stat="{{ label }}">{{ val }}</div>
+        <div class="text-xs text-gray-500 mt-0.5">{{ label }}</div>
       </div>
+      {% endfor %}
     </div>
-  </section>
+  </div>
+</section>
 
-  <!-- =====================================================================
-       WORKFLOW TABS (Seeker / Employer / Referrer)
-  ====================================================================== -->
-  <section class="py-24 bg-[#0a0c10]">
-    <div class="max-w-7xl mx-auto px-6">
-      <div class="text-center mb-12">
-        <h2 class="font-display font-bold text-4xl text-white mb-4">Built for every role in the ecosystem</h2>
-        <p class="text-slate-400 text-lg max-w-xl mx-auto">Explore the tailored workflows designed for each user type.</p>
-      </div>
+<!-- ═══════════════════════════════════════════════════ MAIN LAYOUT ═══ -->
+<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
 
-      <!-- Tab nav -->
-      <div class="flex justify-center gap-0 border-b border-border mb-12">
-        <button class="tab-btn active font-semibold px-8 py-3.5 text-sm transition-all" data-tab="seeker" onclick="switchTab('seeker')">
-          🎯 Job Seeker
-        </button>
-        <button class="tab-btn text-slate-400 font-semibold px-8 py-3.5 text-sm transition-all" data-tab="employer" onclick="switchTab('employer')">
-          🏢 Employer
-        </button>
-        <button class="tab-btn text-slate-400 font-semibold px-8 py-3.5 text-sm transition-all" data-tab="referrer" onclick="switchTab('referrer')">
-          🔗 Referrer
-        </button>
-      </div>
-
-      <!-- Tab panels -->
-
-      <!-- SEEKER -->
-      <div id="tab-seeker" class="tab-panel">
-        <div class="grid lg:grid-cols-2 gap-12 items-start">
-          <div>
-            <span class="tag-purple text-xs font-semibold px-3 py-1 rounded-full inline-block mb-6">For Job Seekers</span>
-            <h3 class="font-display font-bold text-3xl text-white mb-4">Land your dream role, faster.</h3>
-            <p class="text-slate-400 mb-8 leading-relaxed">Build a profile that stands out. Discover roles that match your exact skill set. Apply in under a minute with smart pre-fill and track every application in real time.</p>
-            <ul class="space-y-4 mb-8">
-              <li class="flex items-start gap-3"><span class="w-5 h-5 rounded-full bg-[#6c63ff]/20 flex items-center justify-center flex-shrink-0 mt-0.5 text-[#a89dff] text-xs">✓</span><span class="text-slate-300 text-sm">Searchable profile with skills, portfolio & resume link</span></li>
-              <li class="flex items-start gap-3"><span class="w-5 h-5 rounded-full bg-[#6c63ff]/20 flex items-center justify-center flex-shrink-0 mt-0.5 text-[#a89dff] text-xs">✓</span><span class="text-slate-300 text-sm">Filter jobs by type, location, remote, salary range</span></li>
-              <li class="flex items-start gap-3"><span class="w-5 h-5 rounded-full bg-[#6c63ff]/20 flex items-center justify-center flex-shrink-0 mt-0.5 text-[#a89dff] text-xs">✓</span><span class="text-slate-300 text-sm">Real-time application status: pending → shortlisted → hired</span></li>
-              <li class="flex items-start gap-3"><span class="w-5 h-5 rounded-full bg-[#6c63ff]/20 flex items-center justify-center flex-shrink-0 mt-0.5 text-[#a89dff] text-xs">✓</span><span class="text-slate-300 text-sm">Open-to-work signal visible to employers</span></li>
-            </ul>
-            <button onclick="openModal('register-modal'); setRegisterRole('seeker')" class="btn-primary text-white font-semibold px-6 py-3 rounded-xl text-sm">
-              Create Seeker Profile
-            </button>
-          </div>
-
-          <!-- Seeker UI Mockup -->
-          <div class="card-glass rounded-2xl p-6 shadow-card">
-            <div class="flex items-center gap-3 mb-6">
-              <div class="w-12 h-12 rounded-full bg-gradient-to-br from-[#6c63ff] to-[#00d4b8] flex items-center justify-center text-white font-bold text-lg">A</div>
-              <div>
-                <div class="font-semibold text-white text-sm">Alex Rivera</div>
-                <div class="text-[#a89dff] text-xs">Full-Stack Engineer · Open to Work 🟢</div>
-              </div>
-              <div class="ml-auto tag-teal text-xs px-3 py-1 rounded-full">Active</div>
-            </div>
-
-            <div class="flex gap-2 flex-wrap mb-5">
-              <span class="tag-purple text-xs px-2.5 py-1 rounded-lg">React</span>
-              <span class="tag-purple text-xs px-2.5 py-1 rounded-lg">Python</span>
-              <span class="tag-purple text-xs px-2.5 py-1 rounded-lg">FastAPI</span>
-              <span class="tag-purple text-xs px-2.5 py-1 rounded-lg">PostgreSQL</span>
-            </div>
-
-            <!-- Application tracker -->
-            <div class="font-display text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Your Applications</div>
-            <div class="space-y-2.5">
-              <div class="flex items-center justify-between bg-surface-3 rounded-xl px-4 py-3">
-                <div>
-                  <div class="text-sm font-medium text-white">Senior Backend Engineer</div>
-                  <div class="text-xs text-slate-500">Stripe · Remote</div>
-                </div>
-                <span class="tag-teal text-xs px-2.5 py-1 rounded-full">Shortlisted</span>
-              </div>
-              <div class="flex items-center justify-between bg-surface-3 rounded-xl px-4 py-3">
-                <div>
-                  <div class="text-sm font-medium text-white">Staff Engineer</div>
-                  <div class="text-xs text-slate-500">Vercel · New York</div>
-                </div>
-                <span class="tag-amber text-xs px-2.5 py-1 rounded-full">Reviewed</span>
-              </div>
-              <div class="flex items-center justify-between bg-surface-3 rounded-xl px-4 py-3">
-                <div>
-                  <div class="text-sm font-medium text-white">Lead Engineer</div>
-                  <div class="text-xs text-slate-500">Linear · San Francisco</div>
-                </div>
-                <span class="tag-purple text-xs px-2.5 py-1 rounded-full">Pending</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- EMPLOYER -->
-      <div id="tab-employer" class="tab-panel hidden">
-        <div class="grid lg:grid-cols-2 gap-12 items-start">
-          <div>
-            <span class="tag-teal text-xs font-semibold px-3 py-1 rounded-full inline-block mb-6">For Employers</span>
-            <h3 class="font-display font-bold text-3xl text-white mb-4">Build your team without the noise.</h3>
-            <p class="text-slate-400 mb-8 leading-relaxed">Post detailed job listings in minutes. Track every applicant through a clean pipeline. No resumes lost in email threads — every application is organized, searchable, and actionable.</p>
-            <ul class="space-y-4 mb-8">
-              <li class="flex items-start gap-3"><span class="w-5 h-5 rounded-full bg-[#00d4b8]/20 flex items-center justify-center flex-shrink-0 mt-0.5 text-[#5ef2e0] text-xs">✓</span><span class="text-slate-300 text-sm">Rich job posting: salary, type, requirements, skills</span></li>
-              <li class="flex items-start gap-3"><span class="w-5 h-5 rounded-full bg-[#00d4b8]/20 flex items-center justify-center flex-shrink-0 mt-0.5 text-[#5ef2e0] text-xs">✓</span><span class="text-slate-300 text-sm">Applicant pipeline: pending → reviewed → hired</span></li>
-              <li class="flex items-start gap-3"><span class="w-5 h-5 rounded-full bg-[#00d4b8]/20 flex items-center justify-center flex-shrink-0 mt-0.5 text-[#5ef2e0] text-xs">✓</span><span class="text-slate-300 text-sm">Company profile with branding, industry & size</span></li>
-              <li class="flex items-start gap-3"><span class="w-5 h-5 rounded-full bg-[#00d4b8]/20 flex items-center justify-center flex-shrink-0 mt-0.5 text-[#5ef2e0] text-xs">✓</span><span class="text-slate-300 text-sm">Open/close/draft listing status at any time</span></li>
-            </ul>
-            <button onclick="openModal('register-modal'); setRegisterRole('employer')" class="bg-[#00d4b8] hover:bg-[#00bfa5] text-[#0d0f14] font-bold px-6 py-3 rounded-xl text-sm transition-colors shadow-glow-teal">
-              Post Your First Job
-            </button>
-          </div>
-
-          <!-- Employer UI Mockup -->
-          <div class="card-glass rounded-2xl p-6 shadow-card">
-            <div class="flex items-center justify-between mb-6">
-              <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-[#00d4b8]/20 flex items-center justify-center text-[#5ef2e0] font-bold">S</div>
-                <div>
-                  <div class="font-semibold text-white text-sm">StratosAI</div>
-                  <div class="text-slate-500 text-xs">3 active listings</div>
-                </div>
-              </div>
-              <button class="tag-teal text-xs px-3 py-1.5 rounded-lg font-semibold cursor-pointer" onclick="openModal('post-job-modal')">+ Post Job</button>
-            </div>
-
-            <!-- Job listings -->
-            <div class="space-y-3">
-              <div class="bg-surface-3 rounded-xl p-4 border border-[#00d4b8]/10">
-                <div class="flex items-start justify-between mb-2">
-                  <div class="font-medium text-white text-sm">Product Designer</div>
-                  <span class="tag-teal text-xs px-2 py-0.5 rounded-full">Open</span>
-                </div>
-                <div class="flex gap-2 mb-3">
-                  <span class="tag-purple text-xs px-2 py-0.5 rounded">Remote</span>
-                  <span class="tag-amber text-xs px-2 py-0.5 rounded">Full-time</span>
-                </div>
-                <div class="flex items-center justify-between text-xs text-slate-500">
-                  <span>12 applicants</span>
-                  <span class="text-[#5ef2e0] cursor-pointer hover:underline">View pipeline →</span>
-                </div>
-              </div>
-
-              <div class="bg-surface-3 rounded-xl p-4 border border-[#00d4b8]/10">
-                <div class="flex items-start justify-between mb-2">
-                  <div class="font-medium text-white text-sm">ML Engineer</div>
-                  <span class="tag-teal text-xs px-2 py-0.5 rounded-full">Open</span>
-                </div>
-                <div class="flex gap-2 mb-3">
-                  <span class="tag-purple text-xs px-2 py-0.5 rounded">San Francisco</span>
-                  <span class="tag-amber text-xs px-2 py-0.5 rounded">Senior</span>
-                </div>
-                <div class="flex items-center justify-between text-xs text-slate-500">
-                  <span>8 applicants</span>
-                  <span class="text-[#5ef2e0] cursor-pointer hover:underline">View pipeline →</span>
-                </div>
-              </div>
-
-              <!-- Pipeline preview -->
-              <div class="bg-surface-2 rounded-xl p-4">
-                <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Applicant Pipeline</div>
-                <div class="grid grid-cols-4 gap-2">
-                  <div class="text-center">
-                    <div class="text-xl font-bold text-white">8</div>
-                    <div class="text-[10px] text-slate-500">Pending</div>
-                  </div>
-                  <div class="text-center">
-                    <div class="text-xl font-bold text-[#a89dff]">5</div>
-                    <div class="text-[10px] text-slate-500">Reviewed</div>
-                  </div>
-                  <div class="text-center">
-                    <div class="text-xl font-bold text-[#5ef2e0]">3</div>
-                    <div class="text-[10px] text-slate-500">Shortlisted</div>
-                  </div>
-                  <div class="text-center">
-                    <div class="text-xl font-bold text-[#ffd08a]">1</div>
-                    <div class="text-[10px] text-slate-500">Hired</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- REFERRER -->
-      <div id="tab-referrer" class="tab-panel hidden">
-        <div class="grid lg:grid-cols-2 gap-12 items-start">
-          <div>
-            <span class="tag-amber text-xs font-semibold px-3 py-1 rounded-full inline-block mb-6">For Referrers</span>
-            <h3 class="font-display font-bold text-3xl text-white mb-4">Your network is your asset.</h3>
-            <p class="text-slate-400 mb-8 leading-relaxed">Get a personal referral link. Share it with job seekers, employers, or other connectors. Watch your network grow and track every person you've brought into the ecosystem in real time.</p>
-            <ul class="space-y-4 mb-8">
-              <li class="flex items-start gap-3"><span class="w-5 h-5 rounded-full bg-[#ffb347]/20 flex items-center justify-center flex-shrink-0 mt-0.5 text-[#ffd08a] text-xs">✓</span><span class="text-slate-300 text-sm">Unique referral link auto-generated on sign-up</span></li>
-              <li class="flex items-start gap-3"><span class="w-5 h-5 rounded-full bg-[#ffb347]/20 flex items-center justify-center flex-shrink-0 mt-0.5 text-[#ffd08a] text-xs">✓</span><span class="text-slate-300 text-sm">Track referrals by role: seeker, employer, or referrer</span></li>
-              <li class="flex items-start gap-3"><span class="w-5 h-5 rounded-full bg-[#ffb347]/20 flex items-center justify-center flex-shrink-0 mt-0.5 text-[#ffd08a] text-xs">✓</span><span class="text-slate-300 text-sm">Referral attribution stored permanently in the database</span></li>
-              <li class="flex items-start gap-3"><span class="w-5 h-5 rounded-full bg-[#ffb347]/20 flex items-center justify-center flex-shrink-0 mt-0.5 text-[#ffd08a] text-xs">✓</span><span class="text-slate-300 text-sm">Self-referencing model: see multi-level network growth</span></li>
-            </ul>
-            <button onclick="openModal('register-modal'); setRegisterRole('referrer')" class="bg-[#ffb347] hover:bg-[#ffa030] text-[#0d0f14] font-bold px-6 py-3 rounded-xl text-sm transition-colors">
-              Start Referring Today
-            </button>
-          </div>
-
-          <!-- Referrer UI mockup -->
-          <div class="card-glass rounded-2xl p-6 shadow-card">
-            <div class="flex items-center gap-3 mb-5">
-              <div class="w-10 h-10 rounded-full bg-[#ffb347]/20 flex items-center justify-center text-[#ffd08a] font-bold">M</div>
-              <div>
-                <div class="font-semibold text-white text-sm">Maria Chen</div>
-                <div class="text-slate-500 text-xs">Referrer · Joined March 2025</div>
-              </div>
-            </div>
-
-            <!-- Referral link box -->
-            <div class="bg-surface-3 rounded-xl p-4 mb-5 border border-[#ffb347]/20">
-              <div class="text-xs text-slate-500 mb-2 font-medium">Your Referral Link</div>
-              <div class="flex items-center gap-2">
-                <code class="text-[#ffd08a] text-xs flex-1 truncate bg-surface-2 px-3 py-2 rounded-lg">nexusjobs.io/?ref=mch_x9k2p...</code>
-                <button class="tag-amber text-xs px-3 py-2 rounded-lg font-semibold">Copy</button>
-              </div>
-            </div>
-
-            <!-- Stats -->
-            <div class="grid grid-cols-3 gap-3 mb-5">
-              <div class="bg-surface-3 rounded-xl p-3 text-center">
-                <div class="text-2xl font-bold text-white font-display">24</div>
-                <div class="text-[10px] text-slate-500 mt-0.5">Total Refs</div>
-              </div>
-              <div class="bg-surface-3 rounded-xl p-3 text-center">
-                <div class="text-2xl font-bold text-[#a89dff] font-display">17</div>
-                <div class="text-[10px] text-slate-500 mt-0.5">Seekers</div>
-              </div>
-              <div class="bg-surface-3 rounded-xl p-3 text-center">
-                <div class="text-2xl font-bold text-[#5ef2e0] font-display">7</div>
-                <div class="text-[10px] text-slate-500 mt-0.5">Employers</div>
-              </div>
-            </div>
-
-            <!-- Recent referrals -->
-            <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Recent Referrals</div>
-            <div class="space-y-2">
-              <div class="flex items-center justify-between text-sm">
-                <span class="text-slate-300">Jordan K.</span>
-                <span class="tag-purple text-xs px-2 py-0.5 rounded-full">Seeker</span>
-              </div>
-              <div class="flex items-center justify-between text-sm">
-                <span class="text-slate-300">Pulse Inc.</span>
-                <span class="tag-teal text-xs px-2 py-0.5 rounded-full">Employer</span>
-              </div>
-              <div class="flex items-center justify-between text-sm">
-                <span class="text-slate-300">Sam T.</span>
-                <span class="tag-amber text-xs px-2 py-0.5 rounded-full">Referrer</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- =====================================================================
-       LIVE JOB LISTINGS
-  ====================================================================== -->
-  <section id="jobs" class="py-24">
-    <div class="max-w-7xl mx-auto px-6">
-      <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
+    <!-- ══════════════════════════════════════ JOB BOARD (left / 2/3) ═══ -->
+    <section id="jobs" class="lg:col-span-2">
+      <div class="flex items-center justify-between mb-6">
         <div>
-          <h2 class="font-display font-bold text-4xl text-white mb-2">Open Roles</h2>
-          <p class="text-slate-400">Live listings pulled directly from the NexusJobs API.</p>
+          <h2 class="text-2xl font-bold text-gray-100">Job Board</h2>
+          <p class="text-sm text-gray-500 mt-1">Remote-only, hand-curated positions</p>
         </div>
-        <div class="flex gap-3">
-          <input id="search-input" type="text" placeholder="Search jobs..." class="rounded-xl px-4 py-2.5 text-sm w-52" />
-          <select id="type-filter" class="rounded-xl px-4 py-2.5 text-sm">
-            <option value="">All Types</option>
-            <option value="full-time">Full-time</option>
-            <option value="part-time">Part-time</option>
-            <option value="contract">Contract</option>
-            <option value="internship">Internship</option>
-          </select>
-          <button onclick="loadJobs()" class="btn-primary text-white font-semibold px-5 py-2.5 rounded-xl text-sm">
-            Search
-          </button>
-        </div>
-      </div>
-
-      <!-- Job grid -->
-      <div id="jobs-grid" class="grid md:grid-cols-2 xl:grid-cols-3 gap-5">
-        <!-- populated by JS -->
-        <div class="card-glass rounded-2xl p-6 animate-pulse col-span-full text-center text-slate-500 py-16">
-          Loading jobs...
-        </div>
-      </div>
-
-      <div class="text-center mt-10">
-        <button onclick="loadJobs()" class="btn-outline px-8 py-3 rounded-xl text-sm font-semibold">
-          Refresh Listings
+        <button onclick="openModal('postJobModal')"
+          class="hidden sm:flex items-center gap-2 text-sm px-4 py-2 rounded-lg bg-surface-700 border border-surface-500 hover:border-brand-400 text-gray-300 hover:text-brand-400 transition-all">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+          Post Job
         </button>
       </div>
-    </div>
-  </section>
 
-  <!-- =====================================================================
-       QUICK POST JOB FORM (demo section for employers)
-  ====================================================================== -->
-  <section id="employers" class="py-24 bg-[#0a0c10] border-t border-border">
-    <div class="max-w-4xl mx-auto px-6">
-      <div class="text-center mb-12">
-        <span class="tag-teal text-xs font-semibold px-3 py-1 rounded-full inline-block mb-5">Employer Tools</span>
-        <h2 class="font-display font-bold text-4xl text-white mb-3">Post a Job in 60 Seconds</h2>
-        <p class="text-slate-400">Fill in the details below. The form calls the live <code class="text-[#5ef2e0] bg-surface-2 px-2 py-0.5 rounded">POST /api/jobs</code> endpoint.</p>
-      </div>
-
-      <div class="card-glass rounded-2xl p-8 shadow-card">
-        <form id="post-job-form" onsubmit="handlePostJob(event)">
-          <div class="grid md:grid-cols-2 gap-5 mb-5">
-            <div>
-              <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-2">Job Title *</label>
-              <input id="job-title" type="text" placeholder="e.g. Senior Backend Engineer" class="w-full rounded-xl px-4 py-3 text-sm" required />
-            </div>
-            <div>
-              <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-2">Job Type</label>
-              <select id="job-type" class="w-full rounded-xl px-4 py-3 text-sm">
-                <option value="full-time">Full-time</option>
-                <option value="part-time">Part-time</option>
-                <option value="contract">Contract</option>
-                <option value="internship">Internship</option>
-                <option value="freelance">Freelance</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="mb-5">
-            <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-2">Description *</label>
-            <textarea id="job-description" placeholder="Describe the role, team, and ideal candidate..." class="w-full rounded-xl px-4 py-3 text-sm h-32 resize-none" required></textarea>
-          </div>
-
-          <div class="grid md:grid-cols-3 gap-5 mb-5">
-            <div>
-              <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-2">Location</label>
-              <input id="job-location" type="text" placeholder="e.g. San Francisco" class="w-full rounded-xl px-4 py-3 text-sm" />
-            </div>
-            <div>
-              <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-2">Min Salary (USD)</label>
-              <input id="job-salary-min" type="number" placeholder="80000" class="w-full rounded-xl px-4 py-3 text-sm" />
-            </div>
-            <div>
-              <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-2">Max Salary (USD)</label>
-              <input id="job-salary-max" type="number" placeholder="130000" class="w-full rounded-xl px-4 py-3 text-sm" />
-            </div>
-          </div>
-
-          <div class="grid md:grid-cols-2 gap-5 mb-5">
-            <div>
-              <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-2">Experience Level</label>
-              <select id="job-exp-level" class="w-full rounded-xl px-4 py-3 text-sm">
-                <option value="">Any</option>
-                <option value="entry">Entry</option>
-                <option value="junior">Junior</option>
-                <option value="mid">Mid</option>
-                <option value="senior">Senior</option>
-                <option value="lead">Lead</option>
-                <option value="executive">Executive</option>
-              </select>
-            </div>
-            <div>
-              <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-2">Skills (comma-separated)</label>
-              <input id="job-skills" type="text" placeholder="Python, React, Docker" class="w-full rounded-xl px-4 py-3 text-sm" />
-            </div>
-          </div>
-
-          <div class="flex items-center gap-3 mb-6">
-            <input id="job-remote" type="checkbox" class="w-4 h-4 rounded accent-[#6c63ff]" />
-            <label for="job-remote" class="text-sm text-slate-300">Remote-friendly position</label>
-          </div>
-
-          <!-- Employer ID field (simplified auth) -->
-          <div class="mb-6 p-4 bg-surface-3 rounded-xl border border-border">
-            <p class="text-xs text-slate-500 mb-2">⚡ Demo Mode: Enter an employer User ID to post (register first as an employer to get your ID)</p>
-            <input id="employer-id-post" type="number" placeholder="Employer User ID" class="w-full rounded-xl px-4 py-2.5 text-sm" />
-          </div>
-
-          <button type="submit" class="btn-primary text-white font-bold px-8 py-3.5 rounded-xl text-sm w-full flex items-center justify-center gap-2">
-            <span id="post-job-btn-text">Post This Job</span>
-            <span id="post-job-spinner" class="spinner hidden w-4 h-4 border-2 border-white border-t-transparent rounded-full"></span>
-          </button>
-        </form>
-      </div>
-    </div>
-  </section>
-
-  <!-- =====================================================================
-       REFERRAL SECTION
-  ====================================================================== -->
-  <section id="referrals" class="py-24">
-    <div class="max-w-4xl mx-auto px-6">
-      <div class="text-center mb-12">
-        <span class="tag-amber text-xs font-semibold px-3 py-1 rounded-full inline-block mb-5">Referral System</span>
-        <h2 class="font-display font-bold text-4xl text-white mb-3">Check Your Referral Dashboard</h2>
-        <p class="text-slate-400">Enter your User ID to see your personal referral link and all the users you've brought in. Calls <code class="text-[#ffd08a] bg-surface-2 px-2 py-0.5 rounded">GET /api/users/:id/referral-stats</code>.</p>
-      </div>
-
-      <div class="card-glass rounded-2xl p-8 shadow-card">
-        <div class="flex gap-3 mb-8">
-          <input id="referral-user-id" type="number" placeholder="Your User ID" class="flex-1 rounded-xl px-4 py-3 text-sm" />
-          <button onclick="loadReferralDashboard()" class="bg-[#ffb347] hover:bg-[#ffa030] text-[#0d0f14] font-bold px-6 py-3 rounded-xl text-sm transition-colors flex items-center gap-2">
-            <span>View Dashboard</span>
-            <span id="ref-spinner" class="spinner hidden w-4 h-4 border-2 border-[#0d0f14] border-t-transparent rounded-full"></span>
-          </button>
-        </div>
-
-        <div id="referral-dashboard" class="hidden">
-          <!-- Referral link -->
-          <div class="bg-surface-3 rounded-xl p-5 mb-6 border border-[#ffb347]/20">
-            <div class="text-xs text-slate-500 font-semibold uppercase tracking-wider mb-2">Your Unique Referral Link</div>
-            <div class="flex items-center gap-3">
-              <code id="ref-link-display" class="text-[#ffd08a] text-sm flex-1 truncate bg-surface-2 px-3 py-2.5 rounded-lg"></code>
-              <button onclick="copyReferralLink()" class="tag-amber text-xs px-4 py-2.5 rounded-lg font-semibold whitespace-nowrap">Copy Link</button>
-            </div>
-          </div>
-
-          <!-- Stats -->
-          <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-            <div class="bg-surface-3 rounded-xl p-4 text-center">
-              <div id="stat-total" class="text-3xl font-bold font-display text-white">-</div>
-              <div class="text-xs text-slate-500 mt-1">Total Referrals</div>
-            </div>
-            <div class="bg-surface-3 rounded-xl p-4 text-center">
-              <div id="stat-seekers" class="text-3xl font-bold font-display text-[#a89dff]">-</div>
-              <div class="text-xs text-slate-500 mt-1">Seekers</div>
-            </div>
-            <div class="bg-surface-3 rounded-xl p-4 text-center">
-              <div id="stat-employers" class="text-3xl font-bold font-display text-[#5ef2e0]">-</div>
-              <div class="text-xs text-slate-500 mt-1">Employers</div>
-            </div>
-            <div class="bg-surface-3 rounded-xl p-4 text-center">
-              <div id="stat-referrers" class="text-3xl font-bold font-display text-[#ffd08a]">-</div>
-              <div class="text-xs text-slate-500 mt-1">Referrers</div>
-            </div>
-          </div>
-
-          <!-- Referred users list -->
-          <div id="ref-users-section" class="hidden">
-            <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Referred Users</div>
-            <div id="ref-users-list" class="space-y-2"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- =====================================================================
-       FOOTER
-  ====================================================================== -->
-  <footer class="border-t border-border py-12">
-    <div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-6">
-      <div class="flex items-center gap-2.5">
-        <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-[#6c63ff] to-[#00d4b8] flex items-center justify-center">
-          <svg class="w-3.5 h-3.5 text-white" fill="currentColor" viewBox="0 0 20 20"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
-        </div>
-        <span class="font-display font-bold text-white">NexusJobs</span>
-      </div>
-      <p class="text-slate-600 text-sm">
-        Built with FastAPI · SQLAlchemy · Tailwind CSS · All data stored locally in SQLite.
-      </p>
-      <div class="flex items-center gap-5 text-slate-500 text-sm">
-        <a href="http://localhost:8000/docs" target="_blank" class="hover:text-[#6c63ff] transition-colors">API Docs →</a>
-        <span>v1.0.0</span>
-      </div>
-    </div>
-  </footer>
-
-  <!-- =============================================================
-       MODAL: REGISTER
-  ============================================================== -->
-  <div id="register-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
-    <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" onclick="closeModal('register-modal')"></div>
-    <div class="relative card-glass rounded-2xl p-8 w-full max-w-md shadow-card z-10">
-      <button onclick="closeModal('register-modal')" class="absolute top-4 right-4 text-slate-500 hover:text-white transition-colors text-xl">✕</button>
-
-      <h2 class="font-display font-bold text-2xl text-white mb-1">Create your account</h2>
-      <p class="text-slate-400 text-sm mb-6">Join the NexusJobs ecosystem for free.</p>
-
-      <form id="register-form" onsubmit="handleRegister(event)">
-        <div class="space-y-4">
-          <div>
-            <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1.5">Full Name</label>
-            <input id="reg-name" type="text" placeholder="Alex Rivera" class="w-full rounded-xl px-4 py-3 text-sm" required />
-          </div>
-          <div>
-            <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1.5">Email</label>
-            <input id="reg-email" type="email" placeholder="alex@company.com" class="w-full rounded-xl px-4 py-3 text-sm" required />
-          </div>
-          <div>
-            <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1.5">Password</label>
-            <input id="reg-password" type="password" placeholder="Min 8 characters" class="w-full rounded-xl px-4 py-3 text-sm" required minlength="8" />
-          </div>
-          <div>
-            <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1.5">I am a...</label>
-            <div class="grid grid-cols-3 gap-2">
-              <label class="role-chip cursor-pointer">
-                <input type="radio" name="reg-role" value="seeker" class="hidden" />
-                <div class="card-glass rounded-xl p-3 text-center border-2 border-transparent hover:border-[#6c63ff]/50 transition-all text-xs font-semibold text-slate-400">
-                  🎯 Seeker
+      <!-- Job list (server-rendered) -->
+      <div id="jobList" class="space-y-4">
+        {% if jobs %}
+          {% for job in jobs %}
+          <article class="card-hover bg-surface-800 border border-surface-600 rounded-2xl p-6 group">
+            <div class="flex items-start justify-between gap-4">
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2 mb-1">
+                  <span class="text-xs font-medium bg-brand-500/10 text-brand-400 border border-brand-500/20 rounded-full px-2.5 py-0.5">Remote</span>
+                  <span class="text-xs text-gray-500">{{ job.created_at.strftime('%b %d, %Y') if job.created_at else '' }}</span>
                 </div>
-              </label>
-              <label class="role-chip cursor-pointer">
-                <input type="radio" name="reg-role" value="employer" class="hidden" />
-                <div class="card-glass rounded-xl p-3 text-center border-2 border-transparent hover:border-[#00d4b8]/50 transition-all text-xs font-semibold text-slate-400">
-                  🏢 Employer
-                </div>
-              </label>
-              <label class="role-chip cursor-pointer">
-                <input type="radio" name="reg-role" value="referrer" class="hidden" />
-                <div class="card-glass rounded-xl p-3 text-center border-2 border-transparent hover:border-[#ffb347]/50 transition-all text-xs font-semibold text-slate-400">
-                  🔗 Referrer
-                </div>
-              </label>
+                <h3 class="text-lg font-semibold text-gray-100 truncate">{{ job.title }}</h3>
+                <p class="text-sm text-brand-400 font-medium mt-0.5">{{ job.company }}</p>
+                <p class="text-sm text-gray-400 mt-2 line-clamp-2">{{ job.description }}</p>
+                {% if job.requirements %}
+                <p class="text-xs text-gray-500 mt-2 line-clamp-1"><span class="text-gray-400">Requirements:</span> {{ job.requirements }}</p>
+                {% endif %}
+              </div>
+              <button
+                onclick="openApplyModal({{ job.id }}, '{{ job.title | e }}', '{{ job.company | e }}')"
+                class="shrink-0 px-4 py-2 rounded-lg bg-brand-500/10 border border-brand-500/30 text-brand-400 text-sm font-medium hover:bg-brand-500 hover:text-white transition-all">
+                Apply
+              </button>
             </div>
-          </div>
-          <div>
-            <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1.5">Referral Code (optional)</label>
-            <input id="reg-ref-token" type="text" placeholder="Paste referral token here" class="w-full rounded-xl px-4 py-3 text-sm" />
-          </div>
+          </article>
+          {% endfor %}
+        {% else %}
+        <div class="text-center py-20 bg-surface-800 border border-dashed border-surface-500 rounded-2xl">
+          <div class="text-4xl mb-3">🔍</div>
+          <p class="text-gray-400 font-medium">No jobs listed yet.</p>
+          <p class="text-sm text-gray-600 mt-1">Be the first to <button onclick="openModal('postJobModal')" class="text-brand-400 hover:underline">post a job</button>.</p>
         </div>
+        {% endif %}
+      </div>
+    </section>
 
-        <button type="submit" class="btn-primary text-white font-bold px-6 py-3.5 rounded-xl text-sm w-full mt-6 flex items-center justify-center gap-2">
-          <span id="reg-btn-text">Create Account</span>
-          <span id="reg-spinner" class="spinner hidden w-4 h-4 border-2 border-white border-t-transparent rounded-full"></span>
+    <!-- ══════════════════════════════ WRITERS' CORNER (right / 1/3) ═══ -->
+    <section id="blog" class="lg:col-span-1">
+      <div class="flex items-center justify-between mb-6">
+        <div>
+          <h2 class="text-2xl font-bold text-gray-100">Writers' Corner</h2>
+          <p class="text-sm text-gray-500 mt-1">Insights from the remote-work community</p>
+        </div>
+        <button onclick="openModal('blogModal')"
+          class="text-sm px-3 py-1.5 rounded-lg bg-surface-700 border border-surface-500 hover:border-purple-400 text-gray-300 hover:text-purple-400 transition-all">
+          Write
         </button>
-      </form>
+      </div>
 
-      <p class="text-center text-slate-500 text-xs mt-4">Already have an account? <button onclick="closeModal('register-modal'); openModal('login-modal')" class="text-[#a89dff] hover:underline">Sign in</button></p>
-    </div>
+      <!-- Blog list (server-rendered) -->
+      <div id="blogList" class="space-y-4">
+        {% if blog_posts %}
+          {% for post in blog_posts %}
+          <article class="card-hover bg-surface-800 border border-surface-600 rounded-2xl p-5 group">
+            <div class="flex items-center gap-2 mb-2">
+              <div class="w-6 h-6 rounded-full bg-gradient-to-br from-purple-400 to-pink-500 flex items-center justify-center text-white text-xs font-bold">
+                {{ post.author_name[0] | upper if post.author_name else 'A' }}
+              </div>
+              <span class="text-xs text-gray-400 font-medium">{{ post.author_name or 'Anonymous' }}</span>
+              <span class="text-xs text-gray-600">· {{ post.created_at.strftime('%b %d') if post.created_at else '' }}</span>
+            </div>
+            <h3 class="text-base font-semibold text-gray-100 group-hover:text-brand-400 transition-colors leading-snug">{{ post.title }}</h3>
+            <p class="text-sm text-gray-500 mt-1.5 line-clamp-3">{{ post.content }}</p>
+            {% if post.sample_url %}
+            <a href="{{ post.sample_url }}" target="_blank" rel="noopener noreferrer"
+               class="inline-flex items-center gap-1 text-xs text-purple-400 hover:text-purple-300 mt-2 transition-colors">
+              Read full article
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+            </a>
+            {% endif %}
+          </article>
+          {% endfor %}
+        {% else %}
+        <div class="text-center py-16 bg-surface-800 border border-dashed border-surface-500 rounded-2xl">
+          <div class="text-4xl mb-3">✍️</div>
+          <p class="text-gray-400 font-medium">No articles yet.</p>
+          <p class="text-sm text-gray-600 mt-1"><button onclick="openModal('blogModal')" class="text-purple-400 hover:underline">Share your story</button>.</p>
+        </div>
+        {% endif %}
+      </div>
+    </section>
+
   </div>
+</main>
 
-  <!-- =============================================================
-       MODAL: LOGIN
-  ============================================================== -->
-  <div id="login-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
-    <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" onclick="closeModal('login-modal')"></div>
-    <div class="relative card-glass rounded-2xl p-8 w-full max-w-md shadow-card z-10">
-      <button onclick="closeModal('login-modal')" class="absolute top-4 right-4 text-slate-500 hover:text-white transition-colors text-xl">✕</button>
-
-      <h2 class="font-display font-bold text-2xl text-white mb-1">Welcome back</h2>
-      <p class="text-slate-400 text-sm mb-6">Sign in to your NexusJobs account.</p>
-
-      <form id="login-form" onsubmit="handleLogin(event)">
-        <div class="space-y-4">
-          <div>
-            <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1.5">Email</label>
-            <input id="login-email" type="email" placeholder="your@email.com" class="w-full rounded-xl px-4 py-3 text-sm" required />
-          </div>
-          <div>
-            <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1.5">Password</label>
-            <input id="login-password" type="password" placeholder="Your password" class="w-full rounded-xl px-4 py-3 text-sm" required />
-          </div>
-        </div>
-
-        <button type="submit" class="btn-primary text-white font-bold px-6 py-3.5 rounded-xl text-sm w-full mt-6 flex items-center justify-center gap-2">
-          <span id="login-btn-text">Sign In</span>
-          <span id="login-spinner" class="spinner hidden w-4 h-4 border-2 border-white border-t-transparent rounded-full"></span>
-        </button>
-      </form>
-
-      <p class="text-center text-slate-500 text-xs mt-4">No account? <button onclick="closeModal('login-modal'); openModal('register-modal')" class="text-[#a89dff] hover:underline">Register free</button></p>
-    </div>
+<!-- ═══════════════════════════════════════════════════════ FOOTER ═══ -->
+<footer class="border-t border-surface-700 mt-20 py-8">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-gray-600">
+    <span>© 2025 Remote Work Insider. All rights reserved.</span>
+    <span>Built with FastAPI · SQLAlchemy · Tailwind CSS</span>
   </div>
+</footer>
 
-  <!-- =============================================================
-       MODAL: POST JOB (shortcut)
-  ============================================================== -->
-  <div id="post-job-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
-    <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" onclick="closeModal('post-job-modal')"></div>
-    <div class="relative card-glass rounded-2xl p-6 w-full max-w-md shadow-card z-10">
-      <button onclick="closeModal('post-job-modal')" class="absolute top-4 right-4 text-slate-500 hover:text-white transition-colors text-xl">✕</button>
-      <h2 class="font-display font-bold text-xl text-white mb-1">Quick Post</h2>
-      <p class="text-slate-400 text-sm mb-5">Scroll down to the full posting form →</p>
-      <button onclick="closeModal('post-job-modal'); scrollToSection('employers')" class="bg-[#00d4b8] hover:bg-[#00bfa5] text-[#0d0f14] font-bold w-full py-3 rounded-xl text-sm transition-colors">
-        Go to Job Posting Form
+
+<!-- ═══════════════════════════════════════ MODAL: REGISTER USER ═══ -->
+<div id="registerModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop bg-black/60">
+  <div class="bg-surface-800 border border-surface-500 rounded-2xl w-full max-w-md shadow-2xl fade-in">
+    <div class="flex items-center justify-between p-6 border-b border-surface-700">
+      <div>
+        <h3 class="text-lg font-semibold text-gray-100">Create Account</h3>
+        <p class="text-xs text-gray-500 mt-0.5">Join the Remote Work Insider community</p>
+      </div>
+      <button onclick="closeModal('registerModal')" class="text-gray-500 hover:text-gray-300 transition-colors">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
       </button>
     </div>
+    <form id="registerForm" class="p-6 space-y-4" onsubmit="submitRegister(event)">
+      <div>
+        <label class="block text-xs font-medium text-gray-400 mb-1.5">Full Name *</label>
+        <input name="name" type="text" required placeholder="Jane Doe"
+          class="form-input w-full bg-surface-700 border border-surface-500 rounded-xl px-4 py-2.5 text-sm text-gray-100 placeholder-gray-600 focus:border-brand-400 transition-colors" />
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-gray-400 mb-1.5">Email Address *</label>
+        <input name="email" type="email" required placeholder="jane@example.com"
+          class="form-input w-full bg-surface-700 border border-surface-500 rounded-xl px-4 py-2.5 text-sm text-gray-100 placeholder-gray-600 focus:border-brand-400 transition-colors" />
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-gray-400 mb-1.5">Role *</label>
+        <select name="role" required
+          class="form-input w-full bg-surface-700 border border-surface-500 rounded-xl px-4 py-2.5 text-sm text-gray-100 focus:border-brand-400 transition-colors">
+          <option value="">Select your role…</option>
+          <option value="job_seeker">Job Seeker</option>
+          <option value="employer">Employer</option>
+          <option value="writer">Writer</option>
+          <option value="referrer">Referrer</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-gray-400 mb-1.5">Referrer ID <span class="text-gray-600">(optional)</span></label>
+        <input name="referrer_id" type="number" min="1" placeholder="e.g. 42"
+          class="form-input w-full bg-surface-700 border border-surface-500 rounded-xl px-4 py-2.5 text-sm text-gray-100 placeholder-gray-600 focus:border-brand-400 transition-colors" />
+        <p class="text-xs text-gray-600 mt-1">Enter the ID of the user who referred you.</p>
+      </div>
+      <div id="registerMsg" class="hidden text-sm rounded-xl px-4 py-2.5"></div>
+      <button type="submit"
+        class="w-full py-3 rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 hover:from-brand-600 hover:to-brand-700 text-white font-semibold transition-all text-sm">
+        Create Account
+      </button>
+    </form>
   </div>
+</div>
 
-  <!-- =============================================================
-       SUCCESS MODAL (shown after register)
-  ============================================================== -->
-  <div id="success-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
-    <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" onclick="closeModal('success-modal')"></div>
-    <div class="relative card-glass rounded-2xl p-8 w-full max-w-md shadow-card z-10 text-center">
-      <div class="w-16 h-16 rounded-full bg-gradient-to-br from-[#6c63ff] to-[#00d4b8] flex items-center justify-center text-white text-2xl mx-auto mb-5">✓</div>
-      <h2 class="font-display font-bold text-2xl text-white mb-2">Account Created!</h2>
-      <p id="success-msg" class="text-slate-400 text-sm mb-6"></p>
-      <div id="success-user-info" class="bg-surface-3 rounded-xl p-4 text-left mb-6 text-sm space-y-2"></div>
-      <button onclick="closeModal('success-modal')" class="btn-primary text-white font-bold px-6 py-3 rounded-xl text-sm w-full">
-        Continue to Platform
+
+<!-- ═══════════════════════════════════════ MODAL: POST JOB ═══ -->
+<div id="postJobModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop bg-black/60">
+  <div class="bg-surface-800 border border-surface-500 rounded-2xl w-full max-w-lg shadow-2xl fade-in overflow-y-auto max-h-[90vh]">
+    <div class="flex items-center justify-between p-6 border-b border-surface-700 sticky top-0 bg-surface-800">
+      <div>
+        <h3 class="text-lg font-semibold text-gray-100">Post a Job</h3>
+        <p class="text-xs text-gray-500 mt-0.5">Reach thousands of remote professionals</p>
+      </div>
+      <button onclick="closeModal('postJobModal')" class="text-gray-500 hover:text-gray-300 transition-colors">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
       </button>
     </div>
+    <form id="postJobForm" class="p-6 space-y-4" onsubmit="submitJob(event)">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-medium text-gray-400 mb-1.5">Job Title *</label>
+          <input name="title" type="text" required placeholder="Senior Product Designer"
+            class="form-input w-full bg-surface-700 border border-surface-500 rounded-xl px-4 py-2.5 text-sm text-gray-100 placeholder-gray-600 focus:border-brand-400 transition-colors" />
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-gray-400 mb-1.5">Company *</label>
+          <input name="company" type="text" required placeholder="Acme Corp"
+            class="form-input w-full bg-surface-700 border border-surface-500 rounded-xl px-4 py-2.5 text-sm text-gray-100 placeholder-gray-600 focus:border-brand-400 transition-colors" />
+        </div>
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-gray-400 mb-1.5">Job Description *</label>
+        <textarea name="description" required rows="4" placeholder="Describe the role, responsibilities, and team…"
+          class="form-input w-full bg-surface-700 border border-surface-500 rounded-xl px-4 py-2.5 text-sm text-gray-100 placeholder-gray-600 focus:border-brand-400 transition-colors resize-none"></textarea>
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-gray-400 mb-1.5">Requirements <span class="text-gray-600">(optional)</span></label>
+        <textarea name="requirements" rows="3" placeholder="3+ years React, TypeScript, remote experience…"
+          class="form-input w-full bg-surface-700 border border-surface-500 rounded-xl px-4 py-2.5 text-sm text-gray-100 placeholder-gray-600 focus:border-brand-400 transition-colors resize-none"></textarea>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-medium text-gray-400 mb-1.5">Contact Email *</label>
+          <input name="contact_email" type="email" required placeholder="hiring@acme.com"
+            class="form-input w-full bg-surface-700 border border-surface-500 rounded-xl px-4 py-2.5 text-sm text-gray-100 placeholder-gray-600 focus:border-brand-400 transition-colors" />
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-gray-400 mb-1.5">Your Employer ID <span class="text-gray-600">(optional)</span></label>
+          <input name="posted_by_id" type="number" min="1" placeholder="e.g. 7"
+            class="form-input w-full bg-surface-700 border border-surface-500 rounded-xl px-4 py-2.5 text-sm text-gray-100 placeholder-gray-600 focus:border-brand-400 transition-colors" />
+          <p class="text-xs text-gray-600 mt-1">Must be a user with 'employer' role.</p>
+        </div>
+      </div>
+      <div id="postJobMsg" class="hidden text-sm rounded-xl px-4 py-2.5"></div>
+      <button type="submit"
+        class="w-full py-3 rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 hover:from-brand-600 hover:to-brand-700 text-white font-semibold transition-all text-sm">
+        Publish Job Listing
+      </button>
+    </form>
   </div>
+</div>
 
 
-  <!-- =============================================================
-       JAVASCRIPT — All fetch() API calls
-  ============================================================== -->
-  <script>
-    // ---------------------------------------------------------------
-    // Config
-    // ---------------------------------------------------------------
-    const API = '';  // same-origin; backend serves this HTML
+<!-- ═══════════════════════════════════════ MODAL: APPLY TO JOB ═══ -->
+<div id="applyModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop bg-black/60">
+  <div class="bg-surface-800 border border-surface-500 rounded-2xl w-full max-w-sm shadow-2xl fade-in">
+    <div class="flex items-center justify-between p-6 border-b border-surface-700">
+      <div>
+        <h3 class="text-lg font-semibold text-gray-100">Apply for Role</h3>
+        <p id="applyJobLabel" class="text-xs text-brand-400 font-medium mt-0.5"></p>
+      </div>
+      <button onclick="closeModal('applyModal')" class="text-gray-500 hover:text-gray-300 transition-colors">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <form id="applyForm" class="p-6 space-y-4" onsubmit="submitApplication(event)">
+      <input type="hidden" id="applyJobId" name="job_id" />
+      <div>
+        <label class="block text-xs font-medium text-gray-400 mb-1.5">Your User ID *</label>
+        <input name="user_id" type="number" min="1" required placeholder="e.g. 3"
+          class="form-input w-full bg-surface-700 border border-surface-500 rounded-xl px-4 py-2.5 text-sm text-gray-100 placeholder-gray-600 focus:border-brand-400 transition-colors" />
+        <p class="text-xs text-gray-600 mt-1">Must be a registered user with 'job_seeker' or 'writer' role.</p>
+      </div>
+      <div id="applyMsg" class="hidden text-sm rounded-xl px-4 py-2.5"></div>
+      <button type="submit"
+        class="w-full py-3 rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 hover:from-brand-600 hover:to-brand-700 text-white font-semibold transition-all text-sm">
+        Submit Application
+      </button>
+    </form>
+  </div>
+</div>
 
-    // ---------------------------------------------------------------
-    // Toast
-    // ---------------------------------------------------------------
-    function showToast(msg, type = 'success') {
-      const toast = document.getElementById('toast');
-      const icon = document.getElementById('toast-icon');
-      const text = document.getElementById('toast-msg');
-      icon.textContent = type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️';
-      text.textContent = msg;
-      toast.classList.remove('hidden');
-      setTimeout(() => toast.classList.add('hidden'), 4000);
-    }
 
-    // ---------------------------------------------------------------
-    // Modals
-    // ---------------------------------------------------------------
-    function openModal(id) {
-      const m = document.getElementById(id);
-      m.classList.remove('hidden');
-      m.classList.add('flex');
-    }
-    function closeModal(id) {
-      const m = document.getElementById(id);
-      m.classList.add('hidden');
-      m.classList.remove('flex');
-    }
+<!-- ═══════════════════════════════════════ MODAL: BLOG POST ═══ -->
+<div id="blogModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop bg-black/60">
+  <div class="bg-surface-800 border border-surface-500 rounded-2xl w-full max-w-lg shadow-2xl fade-in overflow-y-auto max-h-[90vh]">
+    <div class="flex items-center justify-between p-6 border-b border-surface-700 sticky top-0 bg-surface-800">
+      <div>
+        <h3 class="text-lg font-semibold text-gray-100">Publish an Article</h3>
+        <p class="text-xs text-gray-500 mt-0.5">Share your remote-work experience</p>
+      </div>
+      <button onclick="closeModal('blogModal')" class="text-gray-500 hover:text-gray-300 transition-colors">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <form id="blogForm" class="p-6 space-y-4" onsubmit="submitBlog(event)">
+      <div>
+        <label class="block text-xs font-medium text-gray-400 mb-1.5">Author ID *</label>
+        <input name="author_id" type="number" min="1" required placeholder="e.g. 2"
+          class="form-input w-full bg-surface-700 border border-surface-500 rounded-xl px-4 py-2.5 text-sm text-gray-100 placeholder-gray-600 focus:border-brand-400 transition-colors" />
+        <p class="text-xs text-gray-600 mt-1">Must be registered with a 'writer', 'job_seeker', or 'referrer' role.</p>
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-gray-400 mb-1.5">Article Title *</label>
+        <input name="title" type="text" required placeholder="How I Landed My Dream Remote Job"
+          class="form-input w-full bg-surface-700 border border-surface-500 rounded-xl px-4 py-2.5 text-sm text-gray-100 placeholder-gray-600 focus:border-brand-400 transition-colors" />
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-gray-400 mb-1.5">Content *</label>
+        <textarea name="content" required rows="5" placeholder="Share your insights, tips, and story with the community…"
+          class="form-input w-full bg-surface-700 border border-surface-500 rounded-xl px-4 py-2.5 text-sm text-gray-100 placeholder-gray-600 focus:border-brand-400 transition-colors resize-none"></textarea>
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-gray-400 mb-1.5">Sample / Portfolio URL <span class="text-gray-600">(optional)</span></label>
+        <input name="sample_url" type="url" placeholder="https://medium.com/@you/article"
+          class="form-input w-full bg-surface-700 border border-surface-500 rounded-xl px-4 py-2.5 text-sm text-gray-100 placeholder-gray-600 focus:border-brand-400 transition-colors" />
+      </div>
+      <div id="blogMsg" class="hidden text-sm rounded-xl px-4 py-2.5"></div>
+      <button type="submit"
+        class="w-full py-3 rounded-xl bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white font-semibold transition-all text-sm">
+        Publish Article
+      </button>
+    </form>
+  </div>
+</div>
 
-    // ---------------------------------------------------------------
-    // Tabs
-    // ---------------------------------------------------------------
-    function switchTab(tab) {
-      ['seeker', 'employer', 'referrer'].forEach(t => {
-        document.getElementById(`tab-${t}`).classList.toggle('hidden', t !== tab);
-        const btn = document.querySelector(`[data-tab="${t}"]`);
-        btn.classList.toggle('active', t === tab);
-        btn.classList.toggle('text-slate-400', t !== tab);
+
+<!-- ═══════════════════════════════════════════════════ JAVASCRIPT ═══ -->
+<script>
+  /* ── Modal helpers ─────────────────────────────────────────────── */
+  function openModal(id) {
+    document.getElementById(id).classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeModal(id) {
+    document.getElementById(id).classList.add('hidden');
+    document.body.style.overflow = '';
+    clearMsg(id.replace('Modal', 'Msg'));
+  }
+
+  // Close modal on backdrop click
+  document.querySelectorAll('[id$="Modal"]').forEach(modal => {
+    modal.addEventListener('click', e => {
+      if (e.target === modal) closeModal(modal.id);
+    });
+  });
+
+  // ESC to close
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      document.querySelectorAll('[id$="Modal"]').forEach(m => {
+        if (!m.classList.contains('hidden')) closeModal(m.id);
       });
     }
+  });
 
-    function scrollToSection(id) {
-      document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+  /* ── Message helpers ───────────────────────────────────────────── */
+  function showMsg(id, text, isError = false) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.classList.remove('hidden', 'bg-red-500/10', 'text-red-400', 'border-red-500/30',
+                         'bg-green-500/10', 'text-green-400', 'border-green-500/30');
+    if (isError) {
+      el.classList.add('bg-red-500/10', 'text-red-400', 'border', 'border-red-500/30');
+    } else {
+      el.classList.add('bg-green-500/10', 'text-green-400', 'border', 'border-green-500/30');
     }
+    el.textContent = text;
+    el.classList.remove('hidden');
+  }
+  function clearMsg(id) {
+    const el = document.getElementById(id);
+    if (el) { el.classList.add('hidden'); el.textContent = ''; }
+  }
 
-    // Pre-select role in register modal
-    function setRegisterRole(role) {
-      const radio = document.querySelector(`input[name="reg-role"][value="${role}"]`);
-      if (radio) {
-        radio.checked = true;
-        updateRoleChips();
-      }
-      openModal('register-modal');
-    }
+  /* ── Date formatter ────────────────────────────────────────────── */
+  function fmtDate(iso) {
+    if (!iso) return '';
+    const d = new Date(iso);
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  }
 
-    function updateRoleChips() {
-      document.querySelectorAll('.role-chip input[type="radio"]').forEach(radio => {
-        const chip = radio.nextElementSibling;
-        const colors = { seeker: '#6c63ff', employer: '#00d4b8', referrer: '#ffb347' };
-        const color = colors[radio.value] || '#6c63ff';
-        if (radio.checked) {
-          chip.style.borderColor = color;
-          chip.style.color = '#e2e8f0';
-          chip.style.background = `${color}1a`;
-        } else {
-          chip.style.borderColor = 'transparent';
-          chip.style.color = '#6b7280';
-          chip.style.background = '';
-        }
+  /* ── Register User ─────────────────────────────────────────────── */
+  async function submitRegister(e) {
+    e.preventDefault();
+    const form = e.target;
+    const btn  = form.querySelector('button[type=submit]');
+    const fd   = new FormData(form);
+    const body = {
+      name: fd.get('name').trim(),
+      email: fd.get('email').trim(),
+      role: fd.get('role'),
+    };
+    const ref = fd.get('referrer_id');
+    if (ref) body.referrer_id = parseInt(ref, 10);
+
+    btn.disabled = true; btn.textContent = 'Creating…';
+    try {
+      const res  = await fetch('/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
       });
-    }
-
-    document.querySelectorAll('.role-chip input[type="radio"]').forEach(r => {
-      r.addEventListener('change', updateRoleChips);
-    });
-
-    // ---------------------------------------------------------------
-    // API: Register
-    // ---------------------------------------------------------------
-    async function handleRegister(e) {
-      e.preventDefault();
-      const name     = document.getElementById('reg-name').value;
-      const email    = document.getElementById('reg-email').value;
-      const password = document.getElementById('reg-password').value;
-      const roleEl   = document.querySelector('input[name="reg-role"]:checked');
-      const token    = document.getElementById('reg-ref-token').value;
-
-      if (!roleEl) { showToast('Please select a role', 'error'); return; }
-
-      const btn = document.getElementById('reg-btn-text');
-      const spinner = document.getElementById('reg-spinner');
-      btn.textContent = 'Creating...';
-      spinner.classList.remove('hidden');
-
-      try {
-        const res = await fetch(`${API}/api/auth/register`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            full_name: name,
-            email,
-            password,
-            role: roleEl.value,
-            referral_token: token || null,
-          }),
-        });
-
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.detail || 'Registration failed');
-
-        closeModal('register-modal');
-
-        // Show success modal
-        const roleLabels = { seeker: 'Job Seeker', employer: 'Employer', referrer: 'Referrer' };
-        document.getElementById('success-msg').textContent =
-          `Welcome, ${data.user.full_name}! Your ${roleLabels[data.user.role]} account is live.`;
-        document.getElementById('success-user-info').innerHTML = `
-          <div class="flex justify-between"><span class="text-slate-500">User ID</span><span class="text-white font-mono font-bold">${data.user.id}</span></div>
-          <div class="flex justify-between"><span class="text-slate-500">Email</span><span class="text-white">${data.user.email}</span></div>
-          <div class="flex justify-between"><span class="text-slate-500">Role</span><span class="text-[#a89dff] font-semibold capitalize">${data.user.role}</span></div>
-          <div class="flex justify-between"><span class="text-slate-500">Token</span><span class="text-[#5ef2e0] font-mono text-xs truncate max-w-xs">${data.access_token.slice(0,24)}...</span></div>
-          ${data.user.referred_by_id ? `<div class="flex justify-between"><span class="text-slate-500">Referred by</span><span class="text-[#ffd08a]">User #${data.user.referred_by_id}</span></div>` : ''}
-        `;
-        openModal('success-modal');
-
-        // Reset form
-        document.getElementById('register-form').reset();
-        loadStats();
-        loadJobs();
-      } catch (err) {
-        showToast(err.message, 'error');
-      } finally {
-        btn.textContent = 'Create Account';
-        spinner.classList.add('hidden');
+      const data = await res.json();
+      if (!res.ok) {
+        showMsg('registerMsg', data.detail || 'Registration failed.', true);
+      } else {
+        showMsg('registerMsg', `✓ Welcome, ${data.name}! Your ID is ${data.id}. Keep it to apply for jobs or write articles.`);
+        form.reset();
+        incrementStat('Professionals');
       }
+    } catch (err) {
+      showMsg('registerMsg', 'Network error. Please try again.', true);
+    } finally {
+      btn.disabled = false; btn.textContent = 'Create Account';
     }
+  }
 
-    // ---------------------------------------------------------------
-    // API: Login
-    // ---------------------------------------------------------------
-    async function handleLogin(e) {
-      e.preventDefault();
-      const email    = document.getElementById('login-email').value;
-      const password = document.getElementById('login-password').value;
+  /* ── Post Job ──────────────────────────────────────────────────── */
+  async function submitJob(e) {
+    e.preventDefault();
+    const form = e.target;
+    const btn  = form.querySelector('button[type=submit]');
+    const fd   = new FormData(form);
+    const body = {
+      title: fd.get('title').trim(),
+      company: fd.get('company').trim(),
+      description: fd.get('description').trim(),
+      requirements: fd.get('requirements').trim() || null,
+      contact_email: fd.get('contact_email').trim(),
+    };
+    const pid = fd.get('posted_by_id');
+    if (pid) body.posted_by_id = parseInt(pid, 10);
 
-      const btn = document.getElementById('login-btn-text');
-      const spinner = document.getElementById('login-spinner');
-      btn.textContent = 'Signing in...';
-      spinner.classList.remove('hidden');
-
-      try {
-        const res = await fetch(`${API}/api/auth/login?email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`, {
-          method: 'POST',
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.detail || 'Login failed');
-
-        closeModal('login-modal');
-        showToast(`Welcome back, ${data.user.full_name}!`);
-        document.getElementById('login-form').reset();
-      } catch (err) {
-        showToast(err.message, 'error');
-      } finally {
-        btn.textContent = 'Sign In';
-        spinner.classList.add('hidden');
+    btn.disabled = true; btn.textContent = 'Publishing…';
+    try {
+      const res  = await fetch('/jobs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        showMsg('postJobMsg', data.detail || 'Failed to post job.', true);
+      } else {
+        showMsg('postJobMsg', `✓ Job "${data.title}" published successfully!`);
+        form.reset();
+        prependJobCard(data);
+        incrementStat('Jobs Listed');
       }
+    } catch (err) {
+      showMsg('postJobMsg', 'Network error. Please try again.', true);
+    } finally {
+      btn.disabled = false; btn.textContent = 'Publish Job Listing';
     }
+  }
 
-    // ---------------------------------------------------------------
-    // API: Post Job
-    // ---------------------------------------------------------------
-    async function handlePostJob(e) {
-      e.preventDefault();
-      const employerId = document.getElementById('employer-id-post').value;
-      if (!employerId) { showToast('Please enter your Employer User ID', 'error'); return; }
+  /* ── Open Apply Modal ──────────────────────────────────────────── */
+  function openApplyModal(jobId, title, company) {
+    document.getElementById('applyJobId').value = jobId;
+    document.getElementById('applyJobLabel').textContent = `${title} @ ${company}`;
+    openModal('applyModal');
+  }
 
-      const btn = document.getElementById('post-job-btn-text');
-      const spinner = document.getElementById('post-job-spinner');
-      btn.textContent = 'Posting...';
-      spinner.classList.remove('hidden');
+  /* ── Apply to Job ──────────────────────────────────────────────── */
+  async function submitApplication(e) {
+    e.preventDefault();
+    const form  = e.target;
+    const btn   = form.querySelector('button[type=submit]');
+    const fd    = new FormData(form);
+    const jobId = fd.get('job_id');
+    const body  = {
+      job_id: parseInt(jobId, 10),
+      user_id: parseInt(fd.get('user_id'), 10),
+    };
 
-      const salMin = parseInt(document.getElementById('job-salary-min').value) || null;
-      const salMax = parseInt(document.getElementById('job-salary-max').value) || null;
-      const expLevel = document.getElementById('job-exp-level').value || null;
-
-      try {
-        const res = await fetch(`${API}/api/jobs?employer_id=${employerId}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            title: document.getElementById('job-title').value,
-            description: document.getElementById('job-description').value,
-            job_type: document.getElementById('job-type').value,
-            location: document.getElementById('job-location').value || null,
-            salary_min: salMin,
-            salary_max: salMax,
-            experience_level: expLevel,
-            skills_required: document.getElementById('job-skills').value || null,
-            is_remote: document.getElementById('job-remote').checked,
-            status: 'open',
-          }),
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.detail || 'Failed to post job');
-
-        showToast(`Job "${data.title}" posted successfully! (ID: ${data.id})`);
-        document.getElementById('post-job-form').reset();
-        loadJobs();
-        scrollToSection('jobs');
-      } catch (err) {
-        showToast(err.message, 'error');
-      } finally {
-        btn.textContent = 'Post This Job';
-        spinner.classList.add('hidden');
+    btn.disabled = true; btn.textContent = 'Submitting…';
+    try {
+      const res  = await fetch(`/jobs/${jobId}/apply`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        showMsg('applyMsg', data.detail || 'Application failed.', true);
+      } else {
+        showMsg('applyMsg', `✓ Application submitted! ID: ${data.id} · Status: ${data.status}`);
+        form.querySelector('[name=user_id]').value = '';
+        incrementStat('Applications');
       }
+    } catch (err) {
+      showMsg('applyMsg', 'Network error. Please try again.', true);
+    } finally {
+      btn.disabled = false; btn.textContent = 'Submit Application';
     }
+  }
 
-    // ---------------------------------------------------------------
-    // API: Load Jobs
-    // ---------------------------------------------------------------
-    async function loadJobs() {
-      const grid = document.getElementById('jobs-grid');
-      grid.innerHTML = `<div class="col-span-full text-center text-slate-500 py-12 animate-pulse">Fetching live jobs from API...</div>`;
+  /* ── Submit Blog Post ──────────────────────────────────────────── */
+  async function submitBlog(e) {
+    e.preventDefault();
+    const form = e.target;
+    const btn  = form.querySelector('button[type=submit]');
+    const fd   = new FormData(form);
+    const body = {
+      author_id: parseInt(fd.get('author_id'), 10),
+      title: fd.get('title').trim(),
+      content: fd.get('content').trim(),
+      sample_url: fd.get('sample_url').trim() || null,
+    };
 
-      const search = document.getElementById('search-input')?.value || '';
-      const type   = document.getElementById('type-filter')?.value || '';
-
-      let url = `${API}/api/jobs?page=1&page_size=9&status=open`;
-      if (search) url += `&q=${encodeURIComponent(search)}`;
-      if (type)   url += `&job_type=${encodeURIComponent(type)}`;
-
-      try {
-        const res  = await fetch(url);
-        const data = await res.json();
-
-        if (!res.ok) throw new Error(data.detail || 'Failed to load jobs');
-
-        if (data.results.length === 0) {
-          grid.innerHTML = `
-            <div class="col-span-full text-center py-16">
-              <div class="text-4xl mb-4">🔍</div>
-              <div class="text-slate-400 font-medium">No jobs found yet.</div>
-              <div class="text-slate-600 text-sm mt-2">Be the first — post a job above!</div>
-            </div>`;
-          return;
-        }
-
-        grid.innerHTML = data.results.map(job => renderJobCard(job)).join('');
-      } catch (err) {
-        grid.innerHTML = `<div class="col-span-full text-center text-rose-400 py-12">Error: ${err.message}</div>`;
+    btn.disabled = true; btn.textContent = 'Publishing…';
+    try {
+      const res  = await fetch('/blog', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        showMsg('blogMsg', data.detail || 'Failed to publish article.', true);
+      } else {
+        showMsg('blogMsg', `✓ Article "${data.title}" published!`);
+        form.reset();
+        prependBlogCard(data);
+        incrementStat('Articles');
       }
+    } catch (err) {
+      showMsg('blogMsg', 'Network error. Please try again.', true);
+    } finally {
+      btn.disabled = false; btn.textContent = 'Publish Article';
     }
+  }
 
-    function renderJobCard(job) {
-      const salary = job.salary_min && job.salary_max
-        ? `$${(job.salary_min / 1000).toFixed(0)}k – $${(job.salary_max / 1000).toFixed(0)}k`
-        : job.salary_min ? `From $${(job.salary_min/1000).toFixed(0)}k` : 'Salary undisclosed';
+  /* ── DOM helpers: prepend new cards ───────────────────────────── */
+  function prependJobCard(job) {
+    const list = document.getElementById('jobList');
+    // Remove empty-state placeholder if present
+    const placeholder = list.querySelector('.border-dashed');
+    if (placeholder) placeholder.closest('div')?.remove();
 
-      const typeColors = { 'full-time': 'tag-teal', 'part-time': 'tag-amber', 'contract': 'tag-rose', 'internship': 'tag-purple', 'freelance': 'tag-purple' };
-      const typeTag = job.job_type ? `<span class="${typeColors[job.job_type] || 'tag-purple'} text-xs px-2.5 py-1 rounded-lg">${job.job_type}</span>` : '';
-      const remoteTag = job.is_remote ? `<span class="tag-teal text-xs px-2.5 py-1 rounded-lg">Remote</span>` : '';
-      const expTag = job.experience_level ? `<span class="tag-amber text-xs px-2.5 py-1 rounded-lg capitalize">${job.experience_level}</span>` : '';
-
-      const companyName = job.employer?.employer_profile?.company_name || `Company #${job.employer_id}`;
-      const initials = companyName.slice(0, 2).toUpperCase();
-
-      const skills = job.skills_required
-        ? job.skills_required.split(',').slice(0, 4).map(s =>
-            `<span class="bg-surface-2 text-slate-400 text-xs px-2 py-0.5 rounded">${s.trim()}</span>`
-          ).join('')
-        : '';
-
-      const timeAgo = formatTimeAgo(new Date(job.created_at));
-
-      return `
-        <div class="job-card card-glass rounded-2xl p-6 flex flex-col border border-border cursor-pointer" onclick="openJobDetail(${job.id})">
-          <div class="flex items-start justify-between mb-4">
-            <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-[#6c63ff]/30 to-[#00d4b8]/20 flex items-center justify-center font-bold text-[#a89dff] text-sm flex-shrink-0">
-                ${initials}
-              </div>
-              <div>
-                <div class="font-semibold text-white text-sm leading-tight">${escapeHtml(job.title)}</div>
-                <div class="text-slate-500 text-xs mt-0.5">${escapeHtml(companyName)}</div>
-              </div>
-            </div>
-            <div class="text-xs text-slate-600 whitespace-nowrap ml-2">${timeAgo}</div>
+    const article = document.createElement('article');
+    article.className = 'card-hover bg-surface-800 border border-surface-600 rounded-2xl p-6 group fade-in';
+    article.innerHTML = `
+      <div class="flex items-start justify-between gap-4">
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center gap-2 mb-1">
+            <span class="text-xs font-medium bg-brand-500/10 text-brand-400 border border-brand-500/20 rounded-full px-2.5 py-0.5">Remote</span>
+            <span class="text-xs text-gray-500">${fmtDate(job.created_at)}</span>
           </div>
+          <h3 class="text-lg font-semibold text-gray-100 truncate">${escHtml(job.title)}</h3>
+          <p class="text-sm text-brand-400 font-medium mt-0.5">${escHtml(job.company)}</p>
+          <p class="text-sm text-gray-400 mt-2 line-clamp-2">${escHtml(job.description)}</p>
+          ${job.requirements ? `<p class="text-xs text-gray-500 mt-2 line-clamp-1"><span class="text-gray-400">Requirements:</span> ${escHtml(job.requirements)}</p>` : ''}
+        </div>
+        <button
+          onclick="openApplyModal(${job.id}, '${escAttr(job.title)}', '${escAttr(job.company)}')"
+          class="shrink-0 px-4 py-2 rounded-lg bg-brand-500/10 border border-brand-500/30 text-brand-400 text-sm font-medium hover:bg-brand-500 hover:text-white transition-all">
+          Apply
+        </button>
+      </div>`;
+    list.prepend(article);
+  }
 
-          <div class="flex flex-wrap gap-1.5 mb-4">
-            ${typeTag}${remoteTag}${expTag}
-            ${job.location && !job.is_remote ? `<span class="tag-purple text-xs px-2.5 py-1 rounded-lg">📍 ${escapeHtml(job.location)}</span>` : ''}
-          </div>
+  function prependBlogCard(post) {
+    const list = document.getElementById('blogList');
+    const placeholder = list.querySelector('.border-dashed');
+    if (placeholder) placeholder.closest('div')?.remove();
 
-          <p class="text-slate-400 text-xs leading-relaxed mb-4 line-clamp-2 flex-1">
-            ${escapeHtml(job.description.substring(0, 120))}${job.description.length > 120 ? '...' : ''}
-          </p>
+    // We don't have the author name from the API response alone; show 'You'
+    const article = document.createElement('article');
+    article.className = 'card-hover bg-surface-800 border border-surface-600 rounded-2xl p-5 group fade-in';
+    article.innerHTML = `
+      <div class="flex items-center gap-2 mb-2">
+        <div class="w-6 h-6 rounded-full bg-gradient-to-br from-purple-400 to-pink-500 flex items-center justify-center text-white text-xs font-bold">Y</div>
+        <span class="text-xs text-gray-400 font-medium">You</span>
+        <span class="text-xs text-gray-600">· Just now</span>
+      </div>
+      <h3 class="text-base font-semibold text-gray-100 group-hover:text-brand-400 transition-colors leading-snug">${escHtml(post.title)}</h3>
+      <p class="text-sm text-gray-500 mt-1.5 line-clamp-3">${escHtml(post.content)}</p>
+      ${post.sample_url ? `
+      <a href="${escHtml(post.sample_url)}" target="_blank" rel="noopener noreferrer"
+         class="inline-flex items-center gap-1 text-xs text-purple-400 hover:text-purple-300 mt-2 transition-colors">
+        Read full article
+        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+      </a>` : ''}`;
+    list.prepend(article);
+  }
 
-          ${skills ? `<div class="flex flex-wrap gap-1.5 mb-4">${skills}</div>` : ''}
+  /* ── Stat counter update ───────────────────────────────────────── */
+  function incrementStat(label) {
+    const el = document.querySelector(`[data-stat="${label}"]`);
+    if (el) el.textContent = parseInt(el.textContent || '0', 10) + 1;
+  }
 
-          <div class="flex items-center justify-between pt-4 border-t border-border mt-auto">
-            <span class="text-[#5ef2e0] text-xs font-semibold">${salary}</span>
-            <span class="text-slate-600 text-xs">${job.application_count ?? 0} applicant${job.application_count !== 1 ? 's' : ''}</span>
-          </div>
-        </div>`;
-    }
+  /* ── Security: HTML escaping ───────────────────────────────────── */
+  function escHtml(str) {
+    const div = document.createElement('div');
+    div.appendChild(document.createTextNode(str || ''));
+    return div.innerHTML;
+  }
+  function escAttr(str) {
+    return (str || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+  }
+</script>
 
-    function openJobDetail(jobId) {
-      showToast(`Opening job #${jobId} — integrate a detail modal here!`, 'info');
-    }
-
-    // ---------------------------------------------------------------
-    // API: Platform Stats
-    // ---------------------------------------------------------------
-    async function loadStats() {
-      try {
-        const res  = await fetch(`${API}/api/stats`);
-        const data = await res.json();
-        if (!res.ok) throw new Error();
-
-        const grid = document.getElementById('stats-grid');
-        grid.innerHTML = `
-          <div class="text-center fade-up">
-            <div class="font-display font-bold text-4xl md:text-5xl text-white mb-1">${data.total_users.toLocaleString()}</div>
-            <div class="text-slate-500 text-sm font-medium">Registered Users</div>
-          </div>
-          <div class="text-center fade-up delay-1">
-            <div class="font-display font-bold text-4xl md:text-5xl gradient-text mb-1">${data.open_jobs.toLocaleString()}</div>
-            <div class="text-slate-500 text-sm font-medium">Open Positions</div>
-          </div>
-          <div class="text-center fade-up delay-2">
-            <div class="font-display font-bold text-4xl md:text-5xl text-white mb-1">${data.total_employers.toLocaleString()}</div>
-            <div class="text-slate-500 text-sm font-medium">Hiring Companies</div>
-          </div>
-          <div class="text-center fade-up delay-3">
-            <div class="font-display font-bold text-4xl md:text-5xl text-white mb-1">${data.total_applications.toLocaleString()}</div>
-            <div class="text-slate-500 text-sm font-medium">Applications Sent</div>
-          </div>`;
-      } catch {
-        // silently fail on stats
-      }
-    }
-
-    // ---------------------------------------------------------------
-    // API: Referral Dashboard
-    // ---------------------------------------------------------------
-    let _refLink = '';
-
-    async function loadReferralDashboard() {
-      const userId = document.getElementById('referral-user-id').value;
-      if (!userId) { showToast('Enter your User ID first', 'error'); return; }
-
-      const spinner = document.getElementById('ref-spinner');
-      spinner.classList.remove('hidden');
-
-      try {
-        // Fetch token and stats in parallel
-        const [tokenRes, statsRes] = await Promise.all([
-          fetch(`${API}/api/users/${userId}/referral-token`),
-          fetch(`${API}/api/users/${userId}/referral-stats`),
-        ]);
-
-        const tokenData = await tokenRes.json();
-        const statsData = await statsRes.json();
-
-        if (!tokenRes.ok) throw new Error(tokenData.detail || 'Failed to load token');
-        if (!statsRes.ok) throw new Error(statsData.detail || 'Failed to load stats');
-
-        // Populate UI
-        _refLink = tokenData.referral_link;
-        document.getElementById('ref-link-display').textContent = tokenData.referral_link;
-        document.getElementById('stat-total').textContent     = statsData.total_referrals;
-        document.getElementById('stat-seekers').textContent   = statsData.seekers_referred;
-        document.getElementById('stat-employers').textContent = statsData.employers_referred;
-        document.getElementById('stat-referrers').textContent = statsData.referrers_referred;
-
-        // Referred users list
-        const usersSection = document.getElementById('ref-users-section');
-        const usersList    = document.getElementById('ref-users-list');
-        if (statsData.referrals.length > 0) {
-          usersSection.classList.remove('hidden');
-          usersList.innerHTML = statsData.referrals.map(u => `
-            <div class="flex items-center justify-between bg-surface-3 rounded-xl px-4 py-3">
-              <div class="flex items-center gap-3">
-                <div class="w-7 h-7 rounded-full bg-surface-2 flex items-center justify-center text-xs font-bold text-slate-400">
-                  ${u.full_name.charAt(0).toUpperCase()}
-                </div>
-                <div>
-                  <div class="text-sm font-medium text-white">${escapeHtml(u.full_name)}</div>
-                  <div class="text-xs text-slate-500">${escapeHtml(u.email)}</div>
-                </div>
-              </div>
-              <span class="${roleBadge(u.role)} text-xs px-2.5 py-1 rounded-full capitalize">${u.role}</span>
-            </div>`).join('');
-        } else {
-          usersSection.classList.add('hidden');
-        }
-
-        document.getElementById('referral-dashboard').classList.remove('hidden');
-        showToast('Referral dashboard loaded!');
-      } catch (err) {
-        showToast(err.message, 'error');
-      } finally {
-        spinner.classList.add('hidden');
-      }
-    }
-
-    function copyReferralLink() {
-      if (!_refLink) return;
-      navigator.clipboard.writeText(_refLink).then(() => showToast('Referral link copied!'));
-    }
-
-    function roleBadge(role) {
-      return role === 'seeker' ? 'tag-purple' : role === 'employer' ? 'tag-teal' : 'tag-amber';
-    }
-
-    // ---------------------------------------------------------------
-    // Helpers
-    // ---------------------------------------------------------------
-    function escapeHtml(str) {
-      return String(str ?? '')
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;');
-    }
-
-    function formatTimeAgo(date) {
-      const diff = Date.now() - date.getTime();
-      const mins = Math.floor(diff / 60000);
-      if (mins < 1)   return 'just now';
-      if (mins < 60)  return `${mins}m ago`;
-      const hrs = Math.floor(mins / 60);
-      if (hrs < 24)   return `${hrs}h ago`;
-      const days = Math.floor(hrs / 24);
-      return `${days}d ago`;
-    }
-
-    // Handle ?ref= param on landing
-    function checkReferralParam() {
-      const params = new URLSearchParams(window.location.search);
-      const ref = params.get('ref');
-      if (ref) {
-        document.getElementById('reg-ref-token').value = ref;
-        showToast('Referral code applied! Create your account to continue.', 'info');
-        setTimeout(() => openModal('register-modal'), 1000);
-      }
-    }
-
-    // ---------------------------------------------------------------
-    // Init
-    // ---------------------------------------------------------------
-    document.addEventListener('DOMContentLoaded', () => {
-      loadStats();
-      loadJobs();
-      checkReferralParam();
-    });
-  </script>
 </body>
 </html>
