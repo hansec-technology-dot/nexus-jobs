@@ -1,233 +1,149 @@
+"""
+Pydantic schemas for request validation and response serialization.
+
+Naming convention:
+  <Model>Create  — used for POST request bodies
+  <Model>Read    — used for GET/POST response bodies (includes DB-generated fields)
+
+All Read schemas set model_config with from_attributes=True (Pydantic v2) so
+FastAPI can serialize SQLAlchemy ORM objects directly.
+
+NOTE: If you are on Pydantic v1, replace `model_config = ConfigDict(from_attributes=True)`
+with `class Config: orm_mode = True` in each Read schema.
+"""
+
 from datetime import datetime
-from typing import Optional
+from typing import List, Optional
 
-from pydantic import BaseModel, EmailStr, Field, HttpUrl, field_validator, model_validator
-
-from models import ApplicationStatus, JobStatus, UserRole
+from pydantic import BaseModel, ConfigDict, EmailStr, field_validator
 
 
 # ---------------------------------------------------------------------------
-# Shared helpers
+# User
 # ---------------------------------------------------------------------------
 
-class TimestampMixin(BaseModel):
-    created_at: datetime
-
-    model_config = {"from_attributes": True}
+VALID_ROLES = {"job_seeker", "employer", "writer", "referrer"}
+VALID_STATUSES = {"pending", "secured", "closed"}
 
 
-# ---------------------------------------------------------------------------
-# User Schemas
-# ---------------------------------------------------------------------------
-
-class UserRegister(BaseModel):
-    full_name: str = Field(..., min_length=2, max_length=120)
+class UserCreate(BaseModel):
+    name: str
     email: EmailStr
-    password: str = Field(..., min_length=8, max_length=128)
-    role: UserRole
-    referral_token: Optional[str] = Field(None, description="Referral token from an existing referrer")
+    role: str
+    referrer_id: Optional[int] = None
 
-    @field_validator("full_name")
+    @field_validator("role")
     @classmethod
-    def name_must_not_be_blank(cls, v: str) -> str:
-        if not v.strip():
-            raise ValueError("full_name must not be blank")
-        return v.strip()
+    def validate_role(cls, v: str) -> str:
+        if v not in VALID_ROLES:
+            raise ValueError(f"role must be one of {sorted(VALID_ROLES)}")
+        return v
 
 
-class UserLogin(BaseModel):
-    email: EmailStr
-    password: str = Field(..., min_length=1)
+class UserRead(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
 
-
-class UserPublic(BaseModel):
     id: int
-    full_name: str
-    email: EmailStr
-    role: UserRole
-    is_active: bool
-    avatar_url: Optional[str] = None
+    name: str
+    email: str
+    role: str
+    referrer_id: Optional[int] = None
     created_at: datetime
-    referred_by_id: Optional[int] = None
-
-    model_config = {"from_attributes": True}
-
-
-class UserWithToken(BaseModel):
-    user: UserPublic
-    access_token: str
-    token_type: str = "bearer"
 
 
 # ---------------------------------------------------------------------------
-# Seeker Profile Schemas
+# Job
 # ---------------------------------------------------------------------------
 
-class SeekerProfileCreate(BaseModel):
-    headline: Optional[str] = Field(None, max_length=200)
-    bio: Optional[str] = None
-    skills: Optional[str] = None  # comma-separated
-    resume_url: Optional[str] = None
-    location: Optional[str] = Field(None, max_length=120)
-    years_of_experience: Optional[int] = Field(None, ge=0, le=60)
-    linkedin_url: Optional[str] = None
-    github_url: Optional[str] = None
-    portfolio_url: Optional[str] = None
-    is_open_to_work: bool = True
-
-
-class SeekerProfileUpdate(SeekerProfileCreate):
-    pass
-
-
-class SeekerProfilePublic(SeekerProfileCreate, TimestampMixin):
-    id: int
-    user_id: int
-
-
-# ---------------------------------------------------------------------------
-# Employer Profile Schemas
-# ---------------------------------------------------------------------------
-
-class EmployerProfileCreate(BaseModel):
-    company_name: str = Field(..., min_length=1, max_length=200)
-    company_description: Optional[str] = None
-    company_website: Optional[str] = None
-    company_size: Optional[str] = Field(None, max_length=50)
-    industry: Optional[str] = Field(None, max_length=120)
-    logo_url: Optional[str] = None
-    headquarters: Optional[str] = Field(None, max_length=120)
-    founded_year: Optional[int] = Field(None, ge=1800, le=2100)
-
-
-class EmployerProfileUpdate(EmployerProfileCreate):
-    company_name: str = Field("", min_length=0, max_length=200)
-
-
-class EmployerProfilePublic(EmployerProfileCreate, TimestampMixin):
-    id: int
-    user_id: int
-
-
-# ---------------------------------------------------------------------------
-# Job Schemas
-# ---------------------------------------------------------------------------
 
 class JobCreate(BaseModel):
-    title: str = Field(..., min_length=3, max_length=200)
-    description: str = Field(..., min_length=10)
+    title: str
+    company: str
+    description: str
     requirements: Optional[str] = None
-    responsibilities: Optional[str] = None
-    location: Optional[str] = Field(None, max_length=120)
-    is_remote: bool = False
-    job_type: Optional[str] = Field(None, pattern=r"^(full-time|part-time|contract|internship|freelance)$")
-    salary_min: Optional[int] = Field(None, ge=0)
-    salary_max: Optional[int] = Field(None, ge=0)
-    salary_currency: str = Field("USD", max_length=10)
-    experience_level: Optional[str] = Field(
-        None, pattern=r"^(entry|junior|mid|senior|lead|executive)$"
-    )
-    skills_required: Optional[str] = None
-    status: JobStatus = JobStatus.open
-    expires_at: Optional[datetime] = None
-
-    @model_validator(mode="after")
-    def salary_range_must_be_valid(self) -> "JobCreate":
-        if self.salary_min is not None and self.salary_max is not None:
-            if self.salary_max < self.salary_min:
-                raise ValueError("salary_max must be >= salary_min")
-        return self
+    contact_email: EmailStr
+    posted_by_id: Optional[int] = None
 
 
-class JobUpdate(JobCreate):
-    title: str = Field("", min_length=0, max_length=200)
-    description: str = Field("", min_length=0)
+class JobRead(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
 
-
-class EmployerSnippet(BaseModel):
     id: int
-    full_name: str
-    employer_profile: Optional[EmployerProfilePublic] = None
-
-    model_config = {"from_attributes": True}
-
-
-class JobPublic(JobCreate, TimestampMixin):
-    id: int
-    employer_id: int
-    updated_at: datetime
-    employer: Optional[EmployerSnippet] = None
-    application_count: Optional[int] = None
-
-    model_config = {"from_attributes": True}
-
-
-class JobList(BaseModel):
-    total: int
-    page: int
-    page_size: int
-    results: list[JobPublic]
+    title: str
+    company: str
+    description: str
+    requirements: Optional[str] = None
+    contact_email: str
+    posted_by_id: Optional[int] = None
+    created_at: datetime
 
 
 # ---------------------------------------------------------------------------
-# Application Schemas
+# Application
 # ---------------------------------------------------------------------------
+
 
 class ApplicationCreate(BaseModel):
-    cover_letter: Optional[str] = Field(None, max_length=5000)
+    job_id: int
+    user_id: int
 
 
 class ApplicationStatusUpdate(BaseModel):
-    status: ApplicationStatus
+    status: str
+
+    @field_validator("status")
+    @classmethod
+    def validate_status(cls, v: str) -> str:
+        if v not in VALID_STATUSES:
+            raise ValueError(f"status must be one of {sorted(VALID_STATUSES)}")
+        return v
 
 
-class ApplicantSnippet(BaseModel):
-    id: int
-    full_name: str
-    email: EmailStr
-    seeker_profile: Optional[SeekerProfilePublic] = None
+class ApplicationRead(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
 
-    model_config = {"from_attributes": True}
-
-
-class ApplicationPublic(BaseModel):
     id: int
     job_id: int
-    applicant_id: int
-    cover_letter: Optional[str] = None
-    status: ApplicationStatus
+    user_id: int
+    status: str
     applied_at: datetime
-    updated_at: datetime
-    applicant: Optional[ApplicantSnippet] = None
-    job: Optional[JobPublic] = None
-
-    model_config = {"from_attributes": True}
 
 
 # ---------------------------------------------------------------------------
-# Referral Schemas
+# BlogPost
 # ---------------------------------------------------------------------------
 
-class ReferralTokenPublic(BaseModel):
-    token: str
-    referral_link: str
+
+class BlogPostCreate(BaseModel):
+    author_id: int
+    title: str
+    content: str
+    sample_url: Optional[str] = None
+
+
+class BlogPostRead(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    author_id: Optional[int] = None
+    title: str
+    content: str
+    sample_url: Optional[str] = None
     created_at: datetime
 
-    model_config = {"from_attributes": True}
-
-
-class ReferralStats(BaseModel):
-    total_referrals: int
-    seekers_referred: int
-    employers_referred: int
-    referrers_referred: int
-    referrals: list[UserPublic]
-
 
 # ---------------------------------------------------------------------------
-# Generic Response
+# Composite / convenience schemas
 # ---------------------------------------------------------------------------
 
-class MessageResponse(BaseModel):
-    message: str
-    detail: Optional[str] = None
+
+class BlogPostReadWithAuthor(BlogPostRead):
+    """Extended read schema that nests author name for template rendering."""
+
+    author_name: Optional[str] = None
+
+
+class JobReadWithApplicationCount(JobRead):
+    """Extended read schema with application count for dashboard views."""
+
+    application_count: int = 0
